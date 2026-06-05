@@ -79,13 +79,20 @@ once `dotnet test` is green.
 - **`IsExternalInit`**: required for `init` setters on netstandard2.0. We ship our own polyfill
   (`src/Testcontainers.Floci/IsExternalInit.cs`) so the modreq doesn't bind to a transitive
   assembly (which breaks net consumers). Keep it.
-- **Container-based services** (RDS, Lambda, ECS, ElastiCache): Floci spawns sibling containers
-  via the Docker daemon, so the Floci container needs `/var/run/docker.sock` mounted, and the
-  config's port range (e.g. RDS proxy `7000–7009`) must be published as **fixed 1:1 bindings**
-  (Floci returns `endpoint=localhost:<port>` literally, so host port must equal container port).
-  Validated working on Colima end-to-end (CreateDBInstance → real Postgres sibling → `SELECT 1`)
-  with `TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE` set. Not yet implemented here — needs core
-  `FlociBuilder` work (socket mount + fixed-port contribution) beyond the flat-service template.
+- **Container-based services** (RDS done; Lambda/ECS/ElastiCache pending): Floci spawns sibling
+  containers via the Docker daemon. A config opts in by overriding `RequiresDockerAccess` (mounts
+  `/var/run/docker.sock`) and `FixedHostPorts` (publishes ports **1:1**, since Floci returns
+  `endpoint=localhost:<port>` literally). `FlociBuilder.WithServiceConfig` honours both. Hard-won
+  gotchas from RDS (see `RdsServiceTest`):
+  - **macOS port 7000 collision**: Control Center / AirPlay Receiver listens on `*:7000`, so the
+    default RDS `ProxyBasePort = 7000` is intercepted by the OS on a Mac. Tests use `7010`.
+  - **Connect via `127.0.0.1`, not `localhost`** — avoids Npgsql resolving to IPv6 (`::1`).
+  - **`SSL Mode=Disable`** — Floci's RdsAuthProxy doesn't do SSL negotiation.
+  - **Siblings leak**: Floci-spawned DB containers are Floci-managed (not Ryuk-tracked) and are
+    named after the instance id, so a leak collides on re-run. Call `DeleteDBInstance` in test
+    teardown so Floci removes them.
+- **Test parallelization is disabled** (`AssemblyInfo.cs`, `DisableTestParallelization = true`):
+  container-backed tests starting many Floci containers at once flake under Docker-daemon load.
 
 ## Git
 
