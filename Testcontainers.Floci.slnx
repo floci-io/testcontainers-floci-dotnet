@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Testcontainers.Floci/Testcontainers.Floci.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Testcontainers.Floci.Tests/Testcontainers.Floci.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,22 @@
+## .NET build output
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+artifacts/
+*.user
+
+## Test / coverage
+[Tt]est[Rr]esult*/
+coverage*.json
+coverage*.xml
+coverage*.info
+*.coverage
+
+## IDE
+.vs/
+.idea/
+*.suo
+
+## OS
+.DS_Store

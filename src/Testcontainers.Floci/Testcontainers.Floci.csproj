@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Package">
+    <PackageId>Testcontainers.Floci</PackageId>
+    <Authors>Testcontainers.Floci contributors</Authors>
+    <Description>A Testcontainers for .NET module for Floci, a free, open-source local AWS emulator.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/hughesjs/testcontainers-floci-dotnet</PackageProjectUrl>
+    <PackageTags>testcontainers;floci;aws;localstack;emulator;testing;docker</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
+    <PackageReference Include="Testcontainers" Version="4.12.0" />
+  </ItemGroup>
+
+</Project>
