@@ -6,10 +6,10 @@ A [Testcontainers for .NET](https://dotnet.testcontainers.org/) module for
 It spins up the `floci/floci` container for your integration tests and gives you an
 endpoint to point the AWS SDK for .NET at. No account, no token.
 
-> **Status:** in development. Core container lifecycle plus typed config for 12 flat services
-> (S3, SQS, SNS, DynamoDB, Secrets Manager, SSM, KMS, EventBridge, IAM, Kinesis, CloudWatch
-> Logs/Metrics), each with unit + live integration tests. Container-based services (RDS, Lambda,
-> ECS, ElastiCache) are not yet implemented.
+> **Status:** in development. Core container lifecycle plus typed config for 14 services, each
+> with unit + live integration tests: 12 flat services (S3, SQS, SNS, DynamoDB, Secrets Manager,
+> SSM, KMS, EventBridge, IAM, Kinesis, CloudWatch Logs/Metrics) and 2 container-based services
+> (RDS, Lambda). ECS and ElastiCache are not yet implemented.
 
 ## Usage
 

@@ -79,7 +79,15 @@ once `dotnet test` is green.
 - **`IsExternalInit`**: required for `init` setters on netstandard2.0. We ship our own polyfill
   (`src/Testcontainers.Floci/IsExternalInit.cs`) so the modreq doesn't bind to a transitive
   assembly (which breaks net consumers). Keep it.
-- **Container-based services** (RDS done; Lambda/ECS/ElastiCache pending): Floci spawns sibling
+- **Lambda** (done, container-based): runs each function's real AWS Lambda runtime container,
+  pulled from `public.ecr.aws/lambda/*` on first invoke (python3.12 ≈ 778 MB, cached after). Real
+  execution (handler output reflects input). `python3.12` and `nodejs20.x` confirmed; handler
+  `lambda_function.handler`; the role ARN is accepted but not validated; `State` is `Active`
+  synchronously. Invocations go through the gateway so Runtime API ports need no publishing
+  (`ExposeRuntimePorts` default false). First invoke is a cold start (~8–10s); set a generous
+  client timeout. `DeleteFunction` removes the runtime container (call it in teardown).
+  Deferred: `awsConfigPath` (needs a host bind-mount) — not yet implemented.
+- **Container-based services** (RDS + Lambda done; ECS/ElastiCache pending): Floci spawns sibling
   containers via the Docker daemon. A config opts in by overriding `RequiresDockerAccess` (mounts
   `/var/run/docker.sock`) and `FixedHostPorts` (publishes ports **1:1**, since Floci returns
   `endpoint=localhost:<port>` literally). `FlociBuilder.WithServiceConfig` honours both. Hard-won

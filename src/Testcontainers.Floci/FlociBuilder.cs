@@ -125,6 +125,14 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithKms(KmsConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's Lambda emulation. Container-based: mounts the Docker socket so Floci can
+    /// run each function's runtime container.
+    /// </summary>
+    /// <param name="config">The Lambda configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithLambda(LambdaConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's RDS emulation. Container-based: mounts the Docker socket and publishes
     /// the proxy port range so spawned database containers are reachable from the host.
     /// </summary>
