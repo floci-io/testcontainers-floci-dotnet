@@ -82,6 +82,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithEventBridge(EventBridgeConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's KMS emulation.
+    /// </summary>
+    /// <param name="config">The KMS configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithKms(KmsConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's S3 emulation.
     /// </summary>
     /// <param name="config">The S3 configuration.</param>
