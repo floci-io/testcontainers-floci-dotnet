@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
 
@@ -33,6 +34,20 @@ public abstract record FlociServiceConfig
     /// <param name="env">The environment-variable map to populate.</param>
     /// <param name="prefix">The fully-qualified env-var prefix for this service.</param>
     protected abstract void AddSettings(IDictionary<string, string> env, string prefix);
+
+    /// <summary>
+    /// Gets a value indicating whether this service spawns sibling containers and therefore
+    /// needs the host Docker socket mounted into the Floci container. Container-based services
+    /// (RDS, Lambda, ECS, ElastiCache) override this to return <see langword="true" />.
+    /// </summary>
+    internal virtual bool RequiresDockerAccess => false;
+
+    /// <summary>
+    /// Gets the host ports that must be published 1:1 (host port == container port) so the host
+    /// can reach sibling containers — e.g. the RDS proxy range, where Floci returns
+    /// <c>endpoint=localhost:&lt;port&gt;</c> literally. Only applied when the service is enabled.
+    /// </summary>
+    internal virtual IReadOnlyCollection<int> FixedHostPorts => Array.Empty<int>();
 
     /// <summary>
     /// Builds the environment variables that represent this configuration.

@@ -1,3 +1,4 @@
+using System;
 using Docker.DotNet.Models;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Configurations;
@@ -175,7 +176,38 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
             builder = builder.WithEnvironment(entry.Key, entry.Value);
         }
 
+        if (config.Enabled && config.RequiresDockerAccess)
+        {
+            builder = builder.WithDockerSocket();
+        }
+
+        if (config.Enabled)
+        {
+            foreach (var port in config.FixedHostPorts)
+            {
+                builder = builder.WithPortBinding(port, port);
+            }
+        }
+
         return builder;
+    }
+
+    /// <summary>
+    /// Mounts the Docker socket into the Floci container so it can spawn sibling containers
+    /// (required by container-based services such as RDS and Lambda). The source path respects
+    /// the standard <c>TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE</c> environment variable, falling
+    /// back to the conventional <c>/var/run/docker.sock</c> — so it works on native Linux Docker
+    /// and VM-based setups (Colima, etc.) without any host-specific code.
+    /// </summary>
+    private FlociBuilder WithDockerSocket()
+    {
+        var socketPath = Environment.GetEnvironmentVariable("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE");
+        if (string.IsNullOrEmpty(socketPath))
+        {
+            socketPath = "/var/run/docker.sock";
+        }
+
+        return WithBindMount(socketPath, "/var/run/docker.sock");
     }
 
     /// <inheritdoc />
