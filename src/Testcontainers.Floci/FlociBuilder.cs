@@ -151,6 +151,22 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithDynamoDb(DynamoDbConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's EC2 emulation. In real mode (the default) the Docker socket is mounted
+    /// so Floci can back instances with containers; in mock mode no socket is needed.
+    /// </summary>
+    /// <param name="config">The EC2 configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithEc2(Ec2Config config) => WithServiceConfig(config);
+
+    /// <summary>
+    /// Configures Floci's ECR emulation. Container-based: mounts the Docker socket and publishes
+    /// the registry port range so the backing registry container is reachable from the host.
+    /// </summary>
+    /// <param name="config">The ECR configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithEcr(EcrConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's ECS emulation. In real mode (the default) the Docker socket is mounted
     /// so Floci can spawn task containers; in mock mode no socket is needed.
     /// </summary>

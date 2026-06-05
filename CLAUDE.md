@@ -88,18 +88,25 @@ once `dotnet test` is green.
   client timeout. `DeleteFunction` removes the runtime container (call it in teardown).
   `AwsConfigPath` is supported (emits `FLOCI_SERVICES_LAMBDA_AWS_CONFIG_PATH`); Floci mounts that
   host path into the function container — on Colima it must be a VM-visible path, not a macOS one.
-- **Container-based services** (RDS + Lambda done; ECS/ElastiCache pending): Floci spawns sibling
-  containers via the Docker daemon. A config opts in by overriding `RequiresDockerAccess` (mounts
-  `/var/run/docker.sock`) and `FixedHostPorts` (publishes ports **1:1**, since Floci returns
-  `endpoint=localhost:<port>` literally). `FlociBuilder.WithServiceConfig` honours both. Hard-won
-  gotchas from RDS (see `RdsServiceTest`):
+- **Container-based services** (RDS, Lambda, ElastiCache, ECS, EC2, ECR — all done): Floci spawns
+  sibling containers via the Docker daemon. A config opts in by overriding `RequiresDockerAccess`
+  (mounts `/var/run/docker.sock`) and `FixedHostPorts` (publishes ports **1:1**, since Floci
+  returns `endpoint=localhost:<port>` literally). `FlociBuilder.WithServiceConfig` honours both.
+  ECS and EC2 also support a `Mock` mode (`RequiresDockerAccess => !Mock`) that returns RUNNING
+  without spawning containers — used by their tests for determinism. Hard-won gotchas:
   - **macOS port 7000 collision**: Control Center / AirPlay Receiver listens on `*:7000`, so the
     default RDS `ProxyBasePort = 7000` is intercepted by the OS on a Mac. Tests use `7010`.
-  - **Connect via `127.0.0.1`, not `localhost`** — avoids Npgsql resolving to IPv6 (`::1`).
+  - **Connect via `127.0.0.1`, not `localhost`** — avoids the client resolving to IPv6 (`::1`).
   - **`SSL Mode=Disable`** — Floci's RdsAuthProxy doesn't do SSL negotiation.
-  - **Siblings leak**: Floci-spawned DB containers are Floci-managed (not Ryuk-tracked) and are
-    named after the instance id, so a leak collides on re-run. Call `DeleteDBInstance` in test
-    teardown so Floci removes them.
+  - **Siblings leak**: Floci-spawned containers are Floci-managed (not Ryuk-tracked). DB/cache/
+    Lambda/function siblings are named after the resource, so delete the resource in teardown
+    (`DeleteDBInstance`/`DeleteReplicationGroup`/`DeleteFunction`) so Floci removes them.
+  - **ECR registry persists**: ECR spawns one shared `floci-ecr-registry` (registry:2) container
+    that isn't tied to a repository, and Floci's `KEEP_RUNNING_ON_SHUTDOWN=false` graceful stop
+    doesn't fire under Testcontainers' abrupt kill — so it lingers after tests. It's *reused*
+    (fixed name) on subsequent runs, so it doesn't accumulate or collide; just be aware it stays up.
+  - **EC2 Auto Scaling env key**: Floci namespaces it separately (`FLOCI_SERVICES_AUTOSCALING_ENABLED`,
+    not under EC2) and upstream emits it unconditionally; `Ec2Config` emits it when EC2 is enabled.
 - **Test parallelization is disabled** (`AssemblyInfo.cs`, `DisableTestParallelization = true`):
   container-backed tests starting many Floci containers at once flake under Docker-daemon load.
 
