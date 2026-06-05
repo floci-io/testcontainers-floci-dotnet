@@ -256,7 +256,8 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
         return base.Init()
             .WithImage(FlociImage)
             .WithPortBinding(FlociPort, true)
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(FlociPort));
+            .WithWaitStrategy(Wait.ForUnixContainer()
+                .UntilHttpRequestIsSucceeded(request => request.ForPath("/_floci/health").ForPort(FlociPort)));
     }
 
     /// <inheritdoc />
