@@ -103,6 +103,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithEventBridge(EventBridgeConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's IAM emulation.
+    /// </summary>
+    /// <param name="config">The IAM configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithIam(IamConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's Kinesis emulation.
     /// </summary>
     /// <param name="config">The Kinesis configuration.</param>
