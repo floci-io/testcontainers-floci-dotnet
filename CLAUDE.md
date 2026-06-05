@@ -20,12 +20,23 @@ All `dotnet` commands need these in the environment:
 
 ```bash
 export PATH="/usr/local/share/dotnet:$PATH"
+# Colima only — see "Running on Colima" below. Not needed on native Linux Docker.
 export DOCKER_HOST="unix:///Users/james/.colima/default/docker.sock"
+export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE="/var/run/docker.sock"
 ```
 
 - `dotnet build` — must stay clean (0 warnings).
 - `dotnet test --filter "FullyQualifiedName~XxxConfigTest"` — fast unit tier, no Docker.
-- `dotnet test` — full suite, needs Docker (Colima). Ryuk is auto-disabled (see gotchas).
+- `dotnet test` — full suite, needs Docker.
+
+### Running on Colima
+
+The committed code is environment-agnostic — no Colima specifics. Colima exposes the Docker
+socket over virtiofs, so its **macOS host** socket path can't be bind-mounted into a container
+(this breaks Ryuk and any socket mount). The fix is purely environmental: set
+`TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock` so Testcontainers mounts the
+**in-VM** socket path instead. With that set, Ryuk works normally — do **not** disable it.
+On native Linux Docker (e.g. CI) neither var is needed; the defaults are correct.
 
 ## The per-service template (how to add a service)
 
@@ -62,15 +73,19 @@ once `dotnet test` is green.
 
 ## Gotchas
 
-- **Ryuk on Colima**: the resource reaper can't bind-mount the virtiofs Docker socket.
-  `TestcontainersSetup.cs` (a `[ModuleInitializer]`) sets `TESTCONTAINERS_RYUK_DISABLED=true`
-  unless already set. Don't remove it. CI with a real daemon can re-enable by setting it `false`.
+- **Ryuk on Colima**: handled by environment, not code (see "Running on Colima"). Set
+  `TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock` and Ryuk works. Do not add any
+  Colima-specific code (e.g. a ModuleInitializer that disables Ryuk) — keep the module portable.
 - **`IsExternalInit`**: required for `init` setters on netstandard2.0. We ship our own polyfill
   (`src/Testcontainers.Floci/IsExternalInit.cs`) so the modreq doesn't bind to a transitive
   assembly (which breaks net consumers). Keep it.
-- **Container-based services** (RDS, Lambda, ECS, ElastiCache) need the Docker socket mounted +
-  root, per the Java `FlociContainer`. Not yet implemented here — these need core work beyond the
-  flat-service template before their configs are useful. Defer them.
+- **Container-based services** (RDS, Lambda, ECS, ElastiCache): Floci spawns sibling containers
+  via the Docker daemon, so the Floci container needs `/var/run/docker.sock` mounted, and the
+  config's port range (e.g. RDS proxy `7000–7009`) must be published as **fixed 1:1 bindings**
+  (Floci returns `endpoint=localhost:<port>` literally, so host port must equal container port).
+  Validated working on Colima end-to-end (CreateDBInstance → real Postgres sibling → `SELECT 1`)
+  with `TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE` set. Not yet implemented here — needs core
+  `FlociBuilder` work (socket mount + fixed-port contribution) beyond the flat-service template.
 
 ## Git
 

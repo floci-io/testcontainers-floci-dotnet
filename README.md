@@ -6,9 +6,10 @@ A [Testcontainers for .NET](https://dotnet.testcontainers.org/) module for
 It spins up the `floci/floci` container for your integration tests and gives you an
 endpoint to point the AWS SDK for .NET at. No account, no token.
 
-> **Status:** early scaffold. The core container lifecycle works; per-service typed
-> configuration is being added incrementally. Environment-variable keys marked
-> `TODO(validate-against-floci)` still need confirming against the running image.
+> **Status:** in development. Core container lifecycle plus typed config for 12 flat services
+> (S3, SQS, SNS, DynamoDB, Secrets Manager, SSM, KMS, EventBridge, IAM, Kinesis, CloudWatch
+> Logs/Metrics), each with unit + live integration tests. Container-based services (RDS, Lambda,
+> ECS, ElastiCache) are not yet implemented.
 
 ## Usage
 
@@ -33,8 +34,22 @@ await s3.PutBucketAsync("my-bucket");
 
 ```bash
 dotnet build
-dotnet test   # requires a running Docker daemon (Colima works)
+dotnet test   # requires a running Docker daemon
 ```
+
+### Running on Colima
+
+The module itself is environment-agnostic. Colima exposes the Docker socket over virtiofs, so
+its macOS host socket path can't be bind-mounted into a container (this otherwise breaks the
+Testcontainers resource reaper). Point Testcontainers at the in-VM socket path instead:
+
+```bash
+export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE="/var/run/docker.sock"
+# and, if your DOCKER_HOST isn't already set to the Colima socket:
+export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock"
+```
+
+On native Linux Docker (e.g. CI), neither variable is needed.
 
 ## Relationship to the upstream Floci project
 
