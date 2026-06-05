@@ -46,7 +46,9 @@ jobs:
           branch: main
           # Don't fail when a push has no feat/fix-style commit — still ship a patch.
           noVersionBumpBehavior: patch
-          noNewCommitBehavior: warn
+          # When HEAD is already the latest tag (e.g. the seeded v0.1.0 baseline), emit that
+          # version rather than erroring, so the first run publishes the baseline cleanly.
+          noNewCommitBehavior: current
 
       - name: Pack
         run: >
