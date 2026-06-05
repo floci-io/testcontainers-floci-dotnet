@@ -75,6 +75,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     }
 
     /// <summary>
+    /// Configures Floci's CloudWatch Logs emulation.
+    /// </summary>
+    /// <param name="config">The CloudWatch Logs configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithCloudWatchLogs(CloudWatchLogsConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's DynamoDB emulation.
     /// </summary>
     /// <param name="config">The DynamoDB configuration.</param>
