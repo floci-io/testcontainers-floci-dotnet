@@ -75,6 +75,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     }
 
     /// <summary>
+    /// Configures Floci's EventBridge emulation.
+    /// </summary>
+    /// <param name="config">The EventBridge configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithEventBridge(EventBridgeConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's S3 emulation.
     /// </summary>
     /// <param name="config">The S3 configuration.</param>
