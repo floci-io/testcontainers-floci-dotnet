@@ -48,9 +48,8 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
     public FlociBuilder WithRegion(string region)
     {
-        // TODO(validate-against-floci): confirm the env var key Floci reads for the default region.
         return Merge(DockerResourceConfiguration, new FlociConfiguration(region: region))
-            .WithEnvironment("AWS_DEFAULT_REGION", region);
+            .WithEnvironment("FLOCI_DEFAULT_REGION", region);
     }
 
     /// <summary>
@@ -60,9 +59,8 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
     public FlociBuilder WithAccountId(string accountId)
     {
-        // TODO(validate-against-floci): confirm the env var key Floci reads for the default account id.
         return Merge(DockerResourceConfiguration, new FlociConfiguration(accountId: accountId))
-            .WithEnvironment("DEFAULT_ACCOUNT_ID", accountId);
+            .WithEnvironment("FLOCI_DEFAULT_ACCOUNT_ID", accountId);
     }
 
     /// <summary>
@@ -72,9 +70,35 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
     public FlociBuilder WithAvailabilityZone(string availabilityZone)
     {
-        // TODO(validate-against-floci): confirm the env var key Floci reads for the default availability zone.
         return Merge(DockerResourceConfiguration, new FlociConfiguration(availabilityZone: availabilityZone))
-            .WithEnvironment("DEFAULT_AVAILABILITY_ZONE", availabilityZone);
+            .WithEnvironment("FLOCI_DEFAULT_AVAILABILITY_ZONE", availabilityZone);
+    }
+
+    /// <summary>
+    /// Configures Floci's SQS emulation.
+    /// </summary>
+    /// <param name="config">The SQS configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithSqs(SqsConfig config)
+    {
+        return WithServiceConfig(config);
+    }
+
+    /// <summary>
+    /// Applies a per-service configuration by translating it to the corresponding
+    /// <c>FLOCI_SERVICES_*</c> environment variables.
+    /// </summary>
+    /// <param name="config">The service configuration to apply.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    private FlociBuilder WithServiceConfig(FlociServiceConfig config)
+    {
+        var builder = this;
+        foreach (var entry in config.BuildEnvironment())
+        {
+            builder = builder.WithEnvironment(entry.Key, entry.Value);
+        }
+
+        return builder;
     }
 
     /// <inheritdoc />
