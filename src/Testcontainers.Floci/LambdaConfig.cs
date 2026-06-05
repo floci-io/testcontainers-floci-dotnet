@@ -93,6 +93,15 @@ public sealed record LambdaConfig : FlociServiceConfig
     public string? DockerNetwork { get; init; }
 
     /// <summary>
+    /// Gets a host path that Floci bind-mounts (read-only) into each function container at
+    /// <c>/opt/aws-config</c>, or <see langword="null" /> to inject dummy credentials as usual.
+    /// When set, Floci points <c>AWS_SHARED_CREDENTIALS_FILE</c> and <c>AWS_CONFIG_FILE</c> at the
+    /// mounted files instead. Note: the path is resolved by the host Docker daemon, so on VM-based
+    /// setups (Colima) it must be a path the VM can see, not a macOS host path.
+    /// </summary>
+    public string? AwsConfigPath { get; init; }
+
+    /// <summary>
     /// Gets the highest port in the Lambda Runtime API port range.
     /// </summary>
     public int RuntimeApiMaxPort => RuntimeApiBasePort + RuntimeApiPortsCount - 1;
@@ -131,6 +140,11 @@ public sealed record LambdaConfig : FlociServiceConfig
         if (!string.IsNullOrEmpty(DockerNetwork))
         {
             env[prefix + "DOCKER_NETWORK"] = DockerNetwork!;
+        }
+
+        if (!string.IsNullOrWhiteSpace(AwsConfigPath))
+        {
+            env[prefix + "AWS_CONFIG_PATH"] = AwsConfigPath!;
         }
     }
 }

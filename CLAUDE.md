@@ -86,7 +86,8 @@ once `dotnet test` is green.
   synchronously. Invocations go through the gateway so Runtime API ports need no publishing
   (`ExposeRuntimePorts` default false). First invoke is a cold start (~8–10s); set a generous
   client timeout. `DeleteFunction` removes the runtime container (call it in teardown).
-  Deferred: `awsConfigPath` (needs a host bind-mount) — not yet implemented.
+  `AwsConfigPath` is supported (emits `FLOCI_SERVICES_LAMBDA_AWS_CONFIG_PATH`); Floci mounts that
+  host path into the function container — on Colima it must be a VM-visible path, not a macOS one.
 - **Container-based services** (RDS + Lambda done; ECS/ElastiCache pending): Floci spawns sibling
   containers via the Docker daemon. A config opts in by overriding `RequiresDockerAccess` (mounts
   `/var/run/docker.sock`) and `FixedHostPorts` (publishes ports **1:1**, since Floci returns

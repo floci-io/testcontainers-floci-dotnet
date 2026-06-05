@@ -57,6 +57,7 @@ public sealed class LambdaConfigTest
         Assert.Equal("false", env["FLOCI_SERVICES_LAMBDA_HOT_RELOAD_ENABLED"]);
         Assert.DoesNotContain("FLOCI_SERVICES_LAMBDA_HOT_RELOAD_ALLOWED_PATHS", env.Keys);
         Assert.DoesNotContain("FLOCI_SERVICES_LAMBDA_DOCKER_NETWORK", env.Keys);
+        Assert.DoesNotContain("FLOCI_SERVICES_LAMBDA_AWS_CONFIG_PATH", env.Keys);
     }
 
     [Fact]
@@ -70,6 +71,7 @@ public sealed class LambdaConfigTest
             HotReloadEnabled = true,
             HotReloadAllowedPaths = new[] { "/a", "/b" },
             DockerNetwork = "floci-net",
+            AwsConfigPath = "/opt/host-aws-config",
         }.BuildEnvironment();
 
         Assert.Equal("true", env["FLOCI_SERVICES_LAMBDA_EPHEMERAL"]);
@@ -78,6 +80,7 @@ public sealed class LambdaConfigTest
         Assert.Equal("true", env["FLOCI_SERVICES_LAMBDA_HOT_RELOAD_ENABLED"]);
         Assert.Equal("/a,/b", env["FLOCI_SERVICES_LAMBDA_HOT_RELOAD_ALLOWED_PATHS"]);
         Assert.Equal("floci-net", env["FLOCI_SERVICES_LAMBDA_DOCKER_NETWORK"]);
+        Assert.Equal("/opt/host-aws-config", env["FLOCI_SERVICES_LAMBDA_AWS_CONFIG_PATH"]);
     }
 
     [Fact]
