@@ -13,6 +13,7 @@
     <PackageReference Include="AWSSDK.KeyManagementService" Version="4.0.3" />
     <PackageReference Include="AWSSDK.S3" Version="4.0.24" />
     <PackageReference Include="AWSSDK.SimpleNotificationService" Version="4.0.3" />
+    <PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="4.0.3" />
     <PackageReference Include="AWSSDK.SQS" Version="4.0.3" />
     <PackageReference Include="coverlet.collector" Version="6.0.4" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />

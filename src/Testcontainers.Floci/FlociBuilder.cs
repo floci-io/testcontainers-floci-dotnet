@@ -103,6 +103,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithS3(S3Config config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's SSM emulation.
+    /// </summary>
+    /// <param name="config">The SSM configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithSsm(SsmConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's SNS emulation.
     /// </summary>
     /// <param name="config">The SNS configuration.</param>
