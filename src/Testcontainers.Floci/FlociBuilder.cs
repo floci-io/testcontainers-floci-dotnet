@@ -75,6 +75,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     }
 
     /// <summary>
+    /// Configures Floci's S3 emulation.
+    /// </summary>
+    /// <param name="config">The S3 configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithS3(S3Config config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's SQS emulation.
     /// </summary>
     /// <param name="config">The SQS configuration.</param>
