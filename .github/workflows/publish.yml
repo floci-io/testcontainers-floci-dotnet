@@ -1,0 +1,70 @@
+name: publish
+
+# Auto-SemVer from Conventional Commits (ietf-tools/semver-action), then publish to the FinLegal
+# GitHub Packages feed on every push to main.
+#
+# Commit messages drive the bump: `feat:` -> minor, `fix:`/`perf:`/`refactor:`/`test:` -> patch,
+# a `!` or `BREAKING CHANGE` -> major. Anything else still advances a patch (noVersionBumpBehavior:
+# patch), so every push to main produces a release. Use Conventional Commits for meaningful bumps.
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write   # create the version tag + release
+  packages: write   # push the package to GitHub Packages
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (full history for versioning)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore
+
+      # Fast gate only. The integration tests are container-backed (some pull large runtime images
+      # and spawn sibling containers); they run locally / in a separate workflow, not on every
+      # push. The *ConfigTest classes cover the env-var mapping for every service with no Docker.
+      - name: Unit tests
+        run: dotnet test -c Release --filter "FullyQualifiedName~ConfigTest"
+
+      - name: Compute version (Conventional Commits)
+        id: version
+        uses: ietf-tools/semver-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
+          # Don't fail when a push has no feat/fix-style commit — still ship a patch.
+          noVersionBumpBehavior: patch
+          noNewCommitBehavior: warn
+
+      - name: Pack
+        run: >
+          dotnet pack src/Testcontainers.Floci/Testcontainers.Floci.csproj
+          -c Release
+          -p:PackageVersion=${{ steps.version.outputs.nextStrict }}
+          -o artifacts
+
+      - name: Push to GitHub Packages
+        run: >
+          dotnet nuget push "artifacts/*.nupkg"
+          --source https://nuget.pkg.github.com/FinLegal/index.json
+          --api-key ${{ secrets.GITHUB_TOKEN }}
+          --skip-duplicate
+
+      - name: Tag + release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.nextStrict }}
+          name: v${{ steps.version.outputs.nextStrict }}
+          generate_release_notes: true

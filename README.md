@@ -16,7 +16,7 @@ endpoint to point the AWS SDK for .NET at. No account, no token.
 ## Usage
 
 ```csharp
-await using var floci = new FlociBuilder().Build();
+await using var floci = new FlociBuilder("floci/floci:1.5.22").Build();
 await floci.StartAsync();
 
 using var s3 = new AmazonS3Client(
@@ -52,6 +52,49 @@ export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock"
 ```
 
 On native Linux Docker (e.g. CI), neither variable is needed.
+
+## Consuming from GitHub Packages
+
+The package is published to the FinLegal GitHub Packages feed on every push to `main`
+(auto-versioned from Conventional Commits). The package id is `Testcontainers.Floci` — the same
+id as the minimal official package on nuget.org — so consumers **must** use NuGet
+[package source mapping](https://learn.microsoft.com/nuget/consume-packages/package-source-mapping)
+to route that id to the FinLegal feed. Add a `nuget.config` to the consuming repo:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+    <add key="github-finlegal" value="https://nuget.pkg.github.com/FinLegal/index.json" />
+  </packageSources>
+  <packageSourceCredentials>
+    <github-finlegal>
+      <add key="Username" value="%GITHUB_ACTOR%" />
+      <add key="ClearTextPassword" value="%GITHUB_PACKAGES_PAT%" />
+    </github-finlegal>
+  </packageSourceCredentials>
+  <packageSourceMapping>
+    <!-- Route ONLY our package to the FinLegal feed; everything else to nuget.org. -->
+    <packageSource key="github-finlegal">
+      <package pattern="Testcontainers.Floci" />
+    </packageSource>
+    <packageSource key="nuget.org">
+      <package pattern="*" />
+    </packageSource>
+  </packageSourceMapping>
+</configuration>
+```
+
+`GITHUB_PACKAGES_PAT` is a PAT with `read:packages`. **The `packageSourceMapping` block is
+required** — without it, NuGet may resolve `Testcontainers.Floci` from nuget.org (the unrelated,
+minimal official package) instead of ours.
+
+## Versioning
+
+Releases are auto-versioned from [Conventional Commits](https://www.conventionalcommits.org/) on
+`main`: `feat:` → minor, `fix:`/`perf:`/`refactor:`/`test:` → patch, `!`/`BREAKING CHANGE` → major.
+Other commits still ship a patch. Write conventional commit messages for meaningful version bumps.
 
 ## Relationship to the upstream Floci project
 
