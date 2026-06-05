@@ -11,6 +11,8 @@
     <PackageReference Include="AWSSDK.CloudWatch" Version="4.0.3" />
     <PackageReference Include="AWSSDK.CloudWatchLogs" Version="4.0.3" />
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.3" />
+    <PackageReference Include="AWSSDK.ECS" Version="4.0.23.1" />
+    <PackageReference Include="AWSSDK.ElastiCache" Version="4.0.5" />
     <PackageReference Include="AWSSDK.EventBridge" Version="4.0.3" />
     <PackageReference Include="AWSSDK.IdentityManagement" Version="4.0.3" />
     <PackageReference Include="AWSSDK.KeyManagementService" Version="4.0.3" />
@@ -25,6 +27,7 @@
     <PackageReference Include="coverlet.collector" Version="6.0.4" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageReference Include="Npgsql" Version="10.0.3" />
+    <PackageReference Include="StackExchange.Redis" Version="2.13.17" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
   </ItemGroup>

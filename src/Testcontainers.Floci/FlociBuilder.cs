@@ -97,6 +97,23 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithDynamoDb(DynamoDbConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's ECS emulation. In real mode (the default) the Docker socket is mounted
+    /// so Floci can spawn task containers; in mock mode no socket is needed.
+    /// </summary>
+    /// <param name="config">The ECS configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithEcs(EcsConfig config) => WithServiceConfig(config);
+
+    /// <summary>
+    /// Configures Floci's ElastiCache emulation. Container-based: mounts the Docker socket and
+    /// publishes the proxy port range so spawned Valkey/Memcached containers are reachable from
+    /// the host.
+    /// </summary>
+    /// <param name="config">The ElastiCache configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithElastiCache(ElastiCacheConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's EventBridge emulation.
     /// </summary>
     /// <param name="config">The EventBridge configuration.</param>
