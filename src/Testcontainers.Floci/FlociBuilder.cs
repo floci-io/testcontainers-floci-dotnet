@@ -89,6 +89,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithEventBridge(EventBridgeConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's Kinesis emulation.
+    /// </summary>
+    /// <param name="config">The Kinesis configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithKinesis(KinesisConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's KMS emulation.
     /// </summary>
     /// <param name="config">The KMS configuration.</param>
