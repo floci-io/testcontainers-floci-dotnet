@@ -13,7 +13,8 @@
     <Authors>Testcontainers.Floci contributors</Authors>
     <Description>A Testcontainers for .NET module for Floci, a free, open-source local AWS emulator.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/hughesjs/testcontainers-floci-dotnet</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/FinLegal/testcontainers-floci-dotnet</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/FinLegal/testcontainers-floci-dotnet</RepositoryUrl>
     <PackageTags>testcontainers;floci;aws;localstack;emulator;testing;docker</PackageTags>
   </PropertyGroup>
 
