@@ -16,7 +16,7 @@ public sealed class RdsServiceTest : IAsyncLifetime
 
     // Base port 7010 avoids the default 7000, which collides with macOS Control Center
     // (AirPlay Receiver) — that listens on *:7000 and would intercept host connections.
-    private readonly FlociContainer _floci = new FlociBuilder()
+    private readonly FlociContainer _floci = new FlociBuilder(TestImages.Floci)
         .WithRds(new RdsConfig { ProxyBasePort = 7010 })
         .Build();
 

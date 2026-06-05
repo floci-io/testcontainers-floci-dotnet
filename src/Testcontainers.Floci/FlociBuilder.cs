@@ -2,6 +2,7 @@ using System;
 using Docker.DotNet.Models;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Configurations;
+using DotNet.Testcontainers.Images;
 using JetBrains.Annotations;
 
 namespace Testcontainers.Floci;
@@ -10,10 +11,13 @@ namespace Testcontainers.Floci;
 [PublicAPI]
 public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer, FlociConfiguration>
 {
+    private const string DefaultImage = "floci/floci:1.5.22";
+
     /// <summary>
-    /// The Floci image. Pinning a digest is recommended for reproducible CI runs.
+    /// The default Floci image.
     /// </summary>
-    public const string FlociImage = "floci/floci:latest";
+    [Obsolete("Pass the image to a constructor instead, e.g. new FlociBuilder(\"floci/floci:1.5.22\"). A baked-in default image will be removed in a future version.")]
+    public const string FlociImage = DefaultImage;
 
     /// <summary>
     /// The single edge port that Floci exposes all AWS services on.
@@ -21,12 +25,34 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public const ushort FlociPort = 4566;
 
     /// <summary>
+    /// Initializes a new instance of the <see cref="FlociBuilder" /> class using the default image.
+    /// </summary>
+    [Obsolete("Use a constructor that takes the image, e.g. new FlociBuilder(\"floci/floci:1.5.22\"). The parameterless constructor will be removed in a future version.")]
+    public FlociBuilder()
+        : this(DefaultImage)
+    {
+    }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="FlociBuilder" /> class.
     /// </summary>
-    public FlociBuilder()
+    /// <param name="image">
+    /// The full Docker image name, including repository and tag (e.g. <c>floci/floci:1.5.22</c>).
+    /// This also lets you point at a private registry mirror.
+    /// </param>
+    public FlociBuilder(string image)
+        : this(new DockerImage(image))
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FlociBuilder" /> class.
+    /// </summary>
+    /// <param name="image">The Docker image to use for the container.</param>
+    public FlociBuilder(IImage image)
         : this(new FlociConfiguration())
     {
-        DockerResourceConfiguration = Init().DockerResourceConfiguration;
+        DockerResourceConfiguration = Init().WithImage(image).DockerResourceConfiguration;
     }
 
     /// <summary>
@@ -254,7 +280,6 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     protected override FlociBuilder Init()
     {
         return base.Init()
-            .WithImage(FlociImage)
             .WithPortBinding(FlociPort, true)
             .WithWaitStrategy(Wait.ForUnixContainer()
                 .UntilHttpRequestIsSucceeded(request => request.ForPath("/_floci/health").ForPort(FlociPort)));

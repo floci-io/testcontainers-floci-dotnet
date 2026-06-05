@@ -10,7 +10,7 @@ namespace Testcontainers.Floci.Tests;
 
 public sealed class CloudWatchMetricsServiceTest : IAsyncLifetime
 {
-    private readonly FlociContainer _floci = new FlociBuilder().Build();
+    private readonly FlociContainer _floci = new FlociBuilder(TestImages.Floci).Build();
 
     public Task InitializeAsync() => _floci.StartAsync();
 

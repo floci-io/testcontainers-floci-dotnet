@@ -15,7 +15,7 @@ public sealed class ElastiCacheServiceTest : IAsyncLifetime
     // Base port 6390 avoids the default 6379, which may be occupied by a local Redis/Valkey
     // instance on developer machines. Ports are published 1:1 so the Floci proxy is reachable
     // on the host at 127.0.0.1:6390.
-    private readonly FlociContainer _floci = new FlociBuilder()
+    private readonly FlociContainer _floci = new FlociBuilder(TestImages.Floci)
         .WithElastiCache(new ElastiCacheConfig { ProxyBasePort = 6390 })
         .Build();
 

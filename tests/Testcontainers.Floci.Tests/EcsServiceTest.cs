@@ -14,7 +14,7 @@ public sealed class EcsServiceTest : IAsyncLifetime
 
     // Mock mode: ECS tasks go straight to RUNNING without spawning real Docker containers.
     // This makes the test deterministic — no container pull, no startup delay, no leaks.
-    private readonly FlociContainer _floci = new FlociBuilder()
+    private readonly FlociContainer _floci = new FlociBuilder(TestImages.Floci)
         .WithEcs(new EcsConfig { Mock = true })
         .Build();
 

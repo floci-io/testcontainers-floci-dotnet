@@ -13,7 +13,7 @@ public sealed class LambdaServiceTest : IAsyncLifetime
 {
     private const string FunctionName = "test-function";
 
-    private readonly FlociContainer _floci = new FlociBuilder()
+    private readonly FlociContainer _floci = new FlociBuilder(TestImages.Floci)
         .WithLambda(new LambdaConfig())
         .Build();
 
