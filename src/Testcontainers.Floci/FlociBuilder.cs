@@ -102,6 +102,27 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     }
 
     /// <summary>
+    /// Configures Floci's API Gateway (v1) emulation.
+    /// </summary>
+    /// <param name="config">The API Gateway configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithApiGateway(ApiGatewayConfig config) => WithServiceConfig(config);
+
+    /// <summary>
+    /// Configures Floci's API Gateway V2 emulation.
+    /// </summary>
+    /// <param name="config">The API Gateway V2 configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithApiGatewayV2(ApiGatewayV2Config config) => WithServiceConfig(config);
+
+    /// <summary>
+    /// Configures Floci's CloudFormation emulation.
+    /// </summary>
+    /// <param name="config">The CloudFormation configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithCloudFormation(CloudFormationConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's CloudWatch Logs emulation.
     /// </summary>
     /// <param name="config">The CloudWatch Logs configuration.</param>
@@ -114,6 +135,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     /// <param name="config">The CloudWatch Metrics configuration.</param>
     /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
     public FlociBuilder WithCloudWatchMetrics(CloudWatchMetricsConfig config) => WithServiceConfig(config);
+
+    /// <summary>
+    /// Configures Floci's Cognito emulation.
+    /// </summary>
+    /// <param name="config">The Cognito configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithCognito(CognitoConfig config) => WithServiceConfig(config);
 
     /// <summary>
     /// Configures Floci's DynamoDB emulation.
@@ -145,6 +173,20 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     /// <param name="config">The EventBridge configuration.</param>
     /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
     public FlociBuilder WithEventBridge(EventBridgeConfig config) => WithServiceConfig(config);
+
+    /// <summary>
+    /// Configures Floci's Firehose emulation.
+    /// </summary>
+    /// <param name="config">The Firehose configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithFirehose(FirehoseConfig config) => WithServiceConfig(config);
+
+    /// <summary>
+    /// Configures Floci's Glue emulation.
+    /// </summary>
+    /// <param name="config">The Glue configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithGlue(GlueConfig config) => WithServiceConfig(config);
 
     /// <summary>
     /// Configures Floci's IAM emulation.
@@ -184,6 +226,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithRds(RdsConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's Resource Groups Tagging emulation.
+    /// </summary>
+    /// <param name="config">The Resource Groups Tagging configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithResourceGroupsTagging(ResourceGroupsTaggingConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's S3 emulation.
     /// </summary>
     /// <param name="config">The S3 configuration.</param>
@@ -205,11 +254,25 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithSsm(SsmConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's SES emulation.
+    /// </summary>
+    /// <param name="config">The SES configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithSes(SesConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's SNS emulation.
     /// </summary>
     /// <param name="config">The SNS configuration.</param>
     /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
     public FlociBuilder WithSns(SnsConfig config) => WithServiceConfig(config);
+
+    /// <summary>
+    /// Configures Floci's Step Functions emulation.
+    /// </summary>
+    /// <param name="config">The Step Functions configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithStepFunctions(StepFunctionsConfig config) => WithServiceConfig(config);
 
     /// <summary>
     /// Configures Floci's SQS emulation.
