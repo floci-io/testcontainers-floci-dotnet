@@ -16,7 +16,6 @@ on:
       - '**.md'
       - 'LICENSE'
       - '.gitignore'
-      - '.github/**'
   workflow_dispatch:
 
 permissions:
