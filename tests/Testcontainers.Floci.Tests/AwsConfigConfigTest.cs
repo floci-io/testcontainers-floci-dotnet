@@ -1,16 +1,19 @@
-namespace Testcontainers.Floci;
+using Testcontainers.Floci;
+using Xunit;
 
-public class AwsConfigConfigTest
+namespace Testcontainers.Floci.Tests;
+
+public sealed class AwsConfigConfigTest
 {
     [Fact]
-    public void DefaultsShouldMatchUpstream()
+    public void DefaultsMatchUpstream()
     {
         var config = new AwsConfigConfig();
         Assert.True(config.Enabled);
     }
 
     [Fact]
-    public void DefaultEnvOutputShouldMatchUpstream()
+    public void DefaultConfigEmitsUpstreamDefaultEnvVars()
     {
         var env = new AwsConfigConfig().BuildEnvironment();
         Assert.Equal("true", env["FLOCI_SERVICES_CONFIGSERVICE_ENABLED"]);
@@ -18,7 +21,7 @@ public class AwsConfigConfigTest
     }
 
     [Fact]
-    public void DisabledOnlyEmitsEnabledFalse()
+    public void DisabledConfigEmitsOnlyTheEnabledFlag()
     {
         var env = new AwsConfigConfig { Enabled = false }.BuildEnvironment();
         Assert.Equal("false", env["FLOCI_SERVICES_CONFIGSERVICE_ENABLED"]);

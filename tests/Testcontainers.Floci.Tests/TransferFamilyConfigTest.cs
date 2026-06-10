@@ -1,16 +1,19 @@
-namespace Testcontainers.Floci;
+using Testcontainers.Floci;
+using Xunit;
 
-public class TransferFamilyConfigTest
+namespace Testcontainers.Floci.Tests;
+
+public sealed class TransferFamilyConfigTest
 {
     [Fact]
-    public void DefaultsShouldMatchUpstream()
+    public void DefaultsMatchUpstream()
     {
         var config = new TransferFamilyConfig();
         Assert.True(config.Enabled);
     }
 
     [Fact]
-    public void DefaultEnvOutputShouldMatchUpstream()
+    public void DefaultConfigEmitsUpstreamDefaultEnvVars()
     {
         var env = new TransferFamilyConfig().BuildEnvironment();
         Assert.Equal("true", env["FLOCI_SERVICES_TRANSFER_ENABLED"]);
@@ -18,7 +21,7 @@ public class TransferFamilyConfigTest
     }
 
     [Fact]
-    public void DisabledOnlyEmitsEnabledFalse()
+    public void DisabledConfigEmitsOnlyTheEnabledFlag()
     {
         var env = new TransferFamilyConfig { Enabled = false }.BuildEnvironment();
         Assert.Equal("false", env["FLOCI_SERVICES_TRANSFER_ENABLED"]);

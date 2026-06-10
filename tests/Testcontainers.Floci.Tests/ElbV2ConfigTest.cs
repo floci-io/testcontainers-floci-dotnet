@@ -41,4 +41,18 @@ public sealed class ElbV2ConfigTest
         Assert.Equal("false", env["FLOCI_SERVICES_ELBV2_ENABLED"]);
         Assert.DoesNotContain("FLOCI_SERVICES_ELBV2_MOCK", env.Keys);
     }
+
+    [Fact]
+    public void ListenerPortsArePublishedAsFixedHostPorts()
+    {
+        var config = new ElbV2Config { ListenerPorts = new[] { 8085, 8086 } };
+
+        Assert.Equal(new[] { 8085, 8086 }, config.FixedHostPorts);
+    }
+
+    [Fact]
+    public void NoListenerPortsMeansNoFixedHostPorts()
+    {
+        Assert.Empty(new ElbV2Config().FixedHostPorts);
+    }
 }
