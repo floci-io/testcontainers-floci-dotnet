@@ -256,6 +256,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithS3(S3Config config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's EventBridge Scheduler emulation.
+    /// </summary>
+    /// <param name="config">The Scheduler configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithScheduler(SchedulerConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's Secrets Manager emulation.
     /// </summary>
     /// <param name="config">The Secrets Manager configuration.</param>
