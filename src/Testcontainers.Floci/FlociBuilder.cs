@@ -137,6 +137,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithCloudFormation(CloudFormationConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's Athena emulation.
+    /// </summary>
+    /// <param name="config">The Athena configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithAthena(AthenaConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's CloudWatch Logs emulation.
     /// </summary>
     /// <param name="config">The CloudWatch Logs configuration.</param>
