@@ -237,6 +237,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithEcr(EcrConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's AWS Config emulation.
+    /// </summary>
+    /// <param name="config">The AWS Config configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithAwsConfig(AwsConfigConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's ECS emulation. In real mode (the default) the Docker socket is mounted
     /// so Floci can spawn task containers; in mock mode no socket is needed.
     /// </summary>
