@@ -179,6 +179,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithDynamoDb(DynamoDbConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's CloudFront emulation.
+    /// </summary>
+    /// <param name="config">The CloudFront configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithCloudFront(CloudFrontConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's EC2 emulation. In real mode (the default) the Docker socket is mounted
     /// so Floci can back instances with containers; in mock mode no socket is needed.
     /// </summary>
