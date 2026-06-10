@@ -1,6 +1,6 @@
 # Testcontainers.Floci (.NET)
 
-[![publish](https://github.com/FinLegal/testcontainers-floci-dotnet/actions/workflows/publish.yml/badge.svg)](https://github.com/FinLegal/testcontainers-floci-dotnet/actions/workflows/publish.yml)
+[![publish](https://github.com/floci-io/testcontainers-floci-dotnet/actions/workflows/publish.yml/badge.svg)](https://github.com/floci-io/testcontainers-floci-dotnet/actions/workflows/publish.yml)
 
 A [Testcontainers for .NET](https://dotnet.testcontainers.org/) module for
 [Floci](https://github.com/floci-io/floci) — a free, open-source local AWS emulator.
@@ -18,7 +18,7 @@ ECS, EC2, ECR) that spawn real backing containers. No AWS account, no token.
 dotnet add package Testcontainers.Floci
 ```
 
-The package is published to the FinLegal GitHub Packages feed (not nuget.org) — see
+The package is published to the floci-io GitHub Packages feed (not nuget.org) — see
 [Consuming from GitHub Packages](#consuming-from-github-packages) for the one-time `nuget.config`
 setup required.
 
@@ -95,24 +95,24 @@ a live integration test.
 The package id is `Testcontainers.Floci` — the same id as the minimal official package on
 nuget.org — so consumers **must** use NuGet
 [package source mapping](https://learn.microsoft.com/nuget/consume-packages/package-source-mapping)
-to route that id to the FinLegal feed. Add a `nuget.config` to the consuming repo:
+to route that id to the floci-io feed. Add a `nuget.config` to the consuming repo:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
   <packageSources>
     <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
-    <add key="github-finlegal" value="https://nuget.pkg.github.com/FinLegal/index.json" />
+    <add key="github-floci-io" value="https://nuget.pkg.github.com/floci-io/index.json" />
   </packageSources>
   <packageSourceCredentials>
-    <github-finlegal>
+    <github-floci-io>
       <add key="Username" value="%GITHUB_ACTOR%" />
       <add key="ClearTextPassword" value="%GITHUB_PACKAGES_PAT%" />
-    </github-finlegal>
+    </github-floci-io>
   </packageSourceCredentials>
   <packageSourceMapping>
-    <!-- Route ONLY our package to the FinLegal feed; everything else to nuget.org. -->
-    <packageSource key="github-finlegal">
+    <!-- Route ONLY our package to the floci-io feed; everything else to nuget.org. -->
+    <packageSource key="github-floci-io">
       <package pattern="Testcontainers.Floci" />
     </packageSource>
     <packageSource key="nuget.org">
