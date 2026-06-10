@@ -137,6 +137,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithAppConfigData(AppConfigDataConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's AppSync emulation.
+    /// </summary>
+    /// <param name="config">The AppSync configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithAppSync(AppSyncConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's CloudFormation emulation.
     /// </summary>
     /// <param name="config">The CloudFormation configuration.</param>
