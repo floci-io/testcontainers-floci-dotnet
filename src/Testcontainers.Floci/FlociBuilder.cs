@@ -102,6 +102,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     }
 
     /// <summary>
+    /// Configures Floci's ACM (Certificate Manager) emulation.
+    /// </summary>
+    /// <param name="config">The ACM configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithAcm(AcmConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's API Gateway (v1) emulation.
     /// </summary>
     /// <param name="config">The API Gateway configuration.</param>
