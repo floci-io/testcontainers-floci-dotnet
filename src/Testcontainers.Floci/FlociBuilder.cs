@@ -179,6 +179,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithCognito(CognitoConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's Bedrock Runtime emulation.
+    /// </summary>
+    /// <param name="config">The Bedrock Runtime configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithBedrockRuntime(BedrockRuntimeConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's DynamoDB emulation.
     /// </summary>
     /// <param name="config">The DynamoDB configuration.</param>

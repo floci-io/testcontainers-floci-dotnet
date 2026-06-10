@@ -15,6 +15,7 @@
     <PackageReference Include="AWSSDK.AppConfigData" Version="4.0.3" />
     <PackageReference Include="AWSSDK.AppSync" Version="4.0.3" />
     <PackageReference Include="AWSSDK.Athena" Version="4.0.3" />
+    <PackageReference Include="AWSSDK.BedrockRuntime" Version="4.0.3" />
     <PackageReference Include="AWSSDK.CloudFormation" Version="4.0.3" />
     <PackageReference Include="AWSSDK.CloudWatch" Version="4.0.3" />
     <PackageReference Include="AWSSDK.CloudFront" Version="4.0.3" />
