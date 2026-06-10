@@ -36,6 +36,7 @@
     <PackageReference Include="AWSSDK.EventBridge" Version="4.0.3" />
     <PackageReference Include="AWSSDK.Glue" Version="4.0.3" />
     <PackageReference Include="AWSSDK.IdentityManagement" Version="4.0.3" />
+    <PackageReference Include="AWSSDK.Kafka" Version="4.0.10.6" />
     <PackageReference Include="AWSSDK.KeyManagementService" Version="4.0.3" />
     <PackageReference Include="AWSSDK.Kinesis" Version="4.0.3" />
     <PackageReference Include="AWSSDK.KinesisFirehose" Version="4.0.3" />

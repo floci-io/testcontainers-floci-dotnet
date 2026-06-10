@@ -367,6 +367,15 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithLambda(LambdaConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's MSK (Managed Streaming for Apache Kafka) emulation. Container-based:
+    /// mounts the Docker socket so Floci can spawn a Redpanda broker container per cluster (unless
+    /// mock mode is enabled).
+    /// </summary>
+    /// <param name="config">The MSK configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithMsk(MskConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's RDS emulation. Container-based: mounts the Docker socket and publishes
     /// the proxy port range so spawned database containers are reachable from the host.
     /// </summary>
