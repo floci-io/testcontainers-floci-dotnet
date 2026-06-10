@@ -9,14 +9,16 @@ name: publish
 on:
   push:
     branches: [ main ]
-    # Docs-only pushes don't change the package, so they don't cut a release. Workflow/CI
-    # changes are NOT ignored — they should trigger the pipeline and run themselves.
+    # Docs/furniture pushes don't change the package, so they don't cut a release. Ignore all
+    # of .github/ EXCEPT workflows — workflow changes should trigger the pipeline (run themselves).
     # (A push that also touches code/tests still triggers — paths-ignore only skips when
     # every changed file matches.)
     paths-ignore:
       - '**.md'
       - 'LICENSE'
       - '.gitignore'
+      - '.github/**'
+      - '!.github/workflows/**'
   workflow_dispatch:
 
 permissions:

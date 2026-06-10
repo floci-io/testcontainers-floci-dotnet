@@ -4,14 +4,14 @@ name: ci
 on:
   pull_request:
     branches: [ main ]
-    # Skip the build/test suite for changes that can't affect it: docs and non-executable
-    # repo furniture. Workflow files themselves still trigger CI so changes to them are validated.
+    # Skip the build/test suite for changes that can't affect it: docs and repo furniture.
+    # Ignore all of .github/ EXCEPT workflows, so changes to the workflows still run CI.
     paths-ignore:
       - '**.md'
       - 'LICENSE'
       - '.gitignore'
-      - '.github/ISSUE_TEMPLATE/**'
-      - '.github/dependabot.yml'
+      - '.github/**'
+      - '!.github/workflows/**'
 
 permissions:
   contents: read
