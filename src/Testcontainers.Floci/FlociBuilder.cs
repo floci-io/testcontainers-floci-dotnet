@@ -376,6 +376,15 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithMsk(MskConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's OpenSearch emulation. Container-based: mounts the Docker socket and
+    /// publishes the proxy port range so spawned OpenSearch containers are reachable from the host
+    /// (unless mock mode is enabled).
+    /// </summary>
+    /// <param name="config">The OpenSearch configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithOpenSearch(OpenSearchConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's RDS emulation. Container-based: mounts the Docker socket and publishes
     /// the proxy port range so spawned database containers are reachable from the host.
     /// </summary>
