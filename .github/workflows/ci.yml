@@ -3,7 +3,8 @@ name: ci
 # Pull-request gate. Runs the two test tiers as separate jobs:
 #   - unit:        the no-Docker *ConfigTest project (env-var mapping for every service).
 #   - integration: the container-backed *ServiceTest project (starts Floci, real AWS SDK
-#                  round-trips; some tests spawn sibling containers). Gated on `unit`.
+#                  round-trips; some tests spawn sibling containers).
+# The two jobs run in parallel for the fastest feedback.
 # Native Linux Docker on the runner needs none of the Colima/macOS overrides — Ryuk works
 # out of the box.
 on:
@@ -45,7 +46,6 @@ jobs:
 
   integration:
     runs-on: ubuntu-latest
-    needs: unit   # only spin up containers once the fast tier is green
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
