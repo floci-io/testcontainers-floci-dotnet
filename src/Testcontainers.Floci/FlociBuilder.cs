@@ -352,6 +352,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithTextract(TextractConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's Transfer Family emulation.
+    /// </summary>
+    /// <param name="config">The Transfer Family configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithTransferFamily(TransferFamilyConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's Lambda emulation. Container-based: mounts the Docker socket so Floci can
     /// run each function's runtime container.
     /// </summary>
