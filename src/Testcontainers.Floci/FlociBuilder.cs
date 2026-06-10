@@ -172,6 +172,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithCloudWatchMetrics(CloudWatchMetricsConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's BCM Data Exports emulation.
+    /// </summary>
+    /// <param name="config">The BCM Data Exports configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithBcmDataExports(BcmDataExportsConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's Cognito emulation.
     /// </summary>
     /// <param name="config">The Cognito configuration.</param>

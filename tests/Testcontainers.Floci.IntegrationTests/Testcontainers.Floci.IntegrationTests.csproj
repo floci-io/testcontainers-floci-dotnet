@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="AWSSDK.CertificateManager" Version="4.0.3" />
     <PackageReference Include="AWSSDK.APIGateway" Version="4.0.3" />
+    <PackageReference Include="AWSSDK.BCMDataExports" Version="4.0.5.5" />
     <PackageReference Include="AWSSDK.ApiGatewayV2" Version="4.0.3" />
     <PackageReference Include="AWSSDK.AppConfig" Version="4.0.3" />
     <PackageReference Include="AWSSDK.AppConfigData" Version="4.0.3" />
