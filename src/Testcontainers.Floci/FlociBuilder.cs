@@ -277,6 +277,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithSes(SesConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's SES v2 emulation.
+    /// </summary>
+    /// <param name="config">The SES v2 configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithSesV2(SesV2Config config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's SNS emulation.
     /// </summary>
     /// <param name="config">The SNS configuration.</param>
