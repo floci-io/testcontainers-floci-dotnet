@@ -34,6 +34,7 @@
     <PackageReference Include="AWSSDK.Lambda" Version="4.0.17" />
     <PackageReference Include="AWSSDK.Pipes" Version="4.0.3" />
     <PackageReference Include="AWSSDK.RDS" Version="4.0.21" />
+    <PackageReference Include="AWSSDK.Route53" Version="4.0.3" />
     <PackageReference Include="AWSSDK.ResourceGroupsTaggingAPI" Version="4.0.3" />
     <PackageReference Include="AWSSDK.S3" Version="4.0.24" />
     <PackageReference Include="AWSSDK.Scheduler" Version="4.0.3.5" />

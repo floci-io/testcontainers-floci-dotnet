@@ -261,6 +261,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithIam(IamConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's Route 53 emulation.
+    /// </summary>
+    /// <param name="config">The Route 53 configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithRoute53(Route53Config config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's Kinesis emulation.
     /// </summary>
     /// <param name="config">The Kinesis configuration.</param>
