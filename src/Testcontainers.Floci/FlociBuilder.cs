@@ -212,6 +212,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithFirehose(FirehoseConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's EventBridge Pipes emulation.
+    /// </summary>
+    /// <param name="config">The Pipes configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithPipes(PipesConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's Glue emulation.
     /// </summary>
     /// <param name="config">The Glue configuration.</param>
