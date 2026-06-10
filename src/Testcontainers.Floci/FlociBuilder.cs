@@ -222,6 +222,14 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithEc2(Ec2Config config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's CodeBuild emulation. Container-based: mounts the Docker socket so Floci
+    /// can run each build inside a spawned container.
+    /// </summary>
+    /// <param name="config">The CodeBuild configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithCodeBuild(CodeBuildConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's CodeDeploy emulation.
     /// </summary>
     /// <param name="config">The CodeDeploy configuration.</param>
