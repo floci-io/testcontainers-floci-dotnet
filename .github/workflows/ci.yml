@@ -49,9 +49,37 @@ jobs:
         with:
           global-json-file: global.json
 
-      # Keep this tag in sync with TestImages.Floci.
-      - name: Pull Floci image
-        run: docker pull floci/floci:1.5.22
+      # Cache the Floci gateway image plus the sibling images Floci spawns, so test runs don't hit
+      # Docker Hub's anonymous pull rate limit. On a cache hit we docker-load the tarballs (zero
+      # Docker Hub requests); on a miss we pull once and save. See .github/docker-images.txt.
+      # Restore/save are split (rather than actions/cache) so the cache is written immediately
+      # after pulling — before the tests run — and therefore persists even if a test later fails.
+      - name: Restore Docker image cache
+        id: docker-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/docker-images
+          key: docker-images-v1-${{ hashFiles('.github/docker-images.txt') }}
+
+      - name: Load or pull Docker images
+        run: |
+          set -euo pipefail
+          mkdir -p ~/docker-images
+          if [ -n "$(ls -A ~/docker-images 2>/dev/null)" ]; then
+            for f in ~/docker-images/*.tar; do docker load -i "$f"; done
+          else
+            grep -vE '^\s*(#|$)' .github/docker-images.txt | while read -r img; do
+              docker pull "$img"
+              docker save "$img" -o ~/docker-images/"$(echo "$img" | tr '/:' '__')".tar
+            done
+          fi
+
+      - name: Save Docker image cache
+        if: steps.docker-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/docker-images
+          key: docker-images-v1-${{ hashFiles('.github/docker-images.txt') }}
 
       - name: Integration tests
         run: dotnet test tests/Testcontainers.Floci.IntegrationTests/Testcontainers.Floci.IntegrationTests.csproj -c Release
