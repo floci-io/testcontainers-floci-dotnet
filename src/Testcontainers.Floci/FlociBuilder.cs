@@ -384,6 +384,14 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithMsk(MskConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's Neptune emulation. Container-based: mounts the Docker socket and publishes
+    /// the proxy port range so the spawned Gremlin Server is reachable from the host.
+    /// </summary>
+    /// <param name="config">The Neptune configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithNeptune(NeptuneConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's OpenSearch emulation. Container-based: mounts the Docker socket and
     /// publishes the proxy port range so spawned OpenSearch containers are reachable from the host
     /// (unless mock mode is enabled).

@@ -42,6 +42,7 @@
     <PackageReference Include="AWSSDK.Kinesis" Version="4.0.3" />
     <PackageReference Include="AWSSDK.KinesisFirehose" Version="4.0.3" />
     <PackageReference Include="AWSSDK.Lambda" Version="4.0.17" />
+    <PackageReference Include="AWSSDK.Neptune" Version="4.0.6.3" />
     <PackageReference Include="AWSSDK.OpenSearchService" Version="4.0.22.5" />
     <PackageReference Include="AWSSDK.Pipes" Version="4.0.3" />
     <PackageReference Include="AWSSDK.Pricing" Version="4.0.3" />
@@ -60,6 +61,7 @@
     <PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="4.0.3" />
     <PackageReference Include="AWSSDK.SQS" Version="4.0.3" />
     <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="Gremlin.Net" Version="3.7.6" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageReference Include="Npgsql" Version="10.0.3" />
     <PackageReference Include="StackExchange.Redis" Version="2.13.17" />

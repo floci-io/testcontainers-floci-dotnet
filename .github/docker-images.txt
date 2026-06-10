@@ -1,0 +1,13 @@
+# Docker Hub images the integration suite pulls at test time — either the Floci gateway image
+# itself or sibling containers Floci spawns. They are cached (docker save/load) in CI so test
+# runs don't hit Docker Hub's anonymous pull rate limit. One image:tag per line; '#' comments and
+# blank lines are ignored. Keep floci/floci in sync with TestImages.Floci.
+#
+# ECR images (public.ecr.aws/lambda/*, public.ecr.aws/docker/library/alpine) are intentionally
+# omitted: they don't count against Docker Hub limits.
+floci/floci:1.5.22
+postgres:16-alpine
+opensearchproject/opensearch:2.19.5
+tinkerpop/gremlin-server:3.7.3
+valkey/valkey:8
+registry:2
