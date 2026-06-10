@@ -289,6 +289,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithGlue(GlueConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's Pricing emulation.
+    /// </summary>
+    /// <param name="config">The Pricing configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithPricing(PricingConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's IAM emulation.
     /// </summary>
     /// <param name="config">The IAM configuration.</param>
