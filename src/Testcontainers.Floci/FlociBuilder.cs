@@ -219,6 +219,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithEventBridge(EventBridgeConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's ELBv2 (Elastic Load Balancing v2) emulation.
+    /// </summary>
+    /// <param name="config">The ELBv2 configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithElbV2(ElbV2Config config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's Firehose emulation.
     /// </summary>
     /// <param name="config">The Firehose configuration.</param>
