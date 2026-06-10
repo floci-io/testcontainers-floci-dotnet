@@ -116,6 +116,20 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithApiGatewayV2(ApiGatewayV2Config config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's AppConfig emulation.
+    /// </summary>
+    /// <param name="config">The AppConfig configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithAppConfig(AppConfigConfig config) => WithServiceConfig(config);
+
+    /// <summary>
+    /// Configures Floci's AppConfig Data emulation.
+    /// </summary>
+    /// <param name="config">The AppConfig Data configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithAppConfigData(AppConfigDataConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's CloudFormation emulation.
     /// </summary>
     /// <param name="config">The CloudFormation configuration.</param>
@@ -256,6 +270,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithS3(S3Config config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's EventBridge Scheduler emulation.
+    /// </summary>
+    /// <param name="config">The Scheduler configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithScheduler(SchedulerConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's Secrets Manager emulation.
     /// </summary>
     /// <param name="config">The Secrets Manager configuration.</param>
@@ -275,6 +296,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     /// <param name="config">The SES configuration.</param>
     /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
     public FlociBuilder WithSes(SesConfig config) => WithServiceConfig(config);
+
+    /// <summary>
+    /// Configures Floci's SES v2 emulation.
+    /// </summary>
+    /// <param name="config">The SES v2 configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithSesV2(SesV2Config config) => WithServiceConfig(config);
 
     /// <summary>
     /// Configures Floci's SNS emulation.
