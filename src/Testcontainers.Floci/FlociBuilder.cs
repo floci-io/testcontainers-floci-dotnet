@@ -165,6 +165,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithCloudWatchLogs(CloudWatchLogsConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's AWS Backup emulation.
+    /// </summary>
+    /// <param name="config">The Backup configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithBackup(BackupConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's CloudWatch Metrics emulation.
     /// </summary>
     /// <param name="config">The CloudWatch Metrics configuration.</param>
