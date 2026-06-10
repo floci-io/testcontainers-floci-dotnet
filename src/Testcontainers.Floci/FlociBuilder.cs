@@ -231,6 +231,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithEcs(EcsConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's Cost Explorer emulation.
+    /// </summary>
+    /// <param name="config">The Cost Explorer configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithCostExplorer(CostExplorerConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's ElastiCache emulation. Container-based: mounts the Docker socket and
     /// publishes the proxy port range so spawned Valkey/Memcached containers are reachable from
     /// the host.
