@@ -10,12 +10,14 @@ on:
   push:
     branches: [ main ]
     # Docs/metadata-only pushes don't change the package, so they don't cut a release.
+    # Nothing under .github/ (workflows, templates, dependabot) affects the published package.
     # (A push that also touches code/tests still triggers — paths-ignore only skips when
     # every changed file matches.)
     paths-ignore:
       - '**.md'
       - 'LICENSE'
       - '.gitignore'
+      - '.github/**'
   workflow_dispatch:
 
 permissions:
