@@ -39,9 +39,7 @@ jobs:
       - name: Restore
         run: dotnet restore
 
-      # Fast gate only. The unit project is the no-Docker tier (the *ConfigTest classes cover the
-      # env-var mapping for every service). The container-backed integration project runs on PRs
-      # via ci.yml, not in this publish path.
+      # Fast no-Docker gate (the *ConfigTest unit project). Integration runs on PRs via ci.yml.
       - name: Unit tests
         run: dotnet test tests/Testcontainers.Floci.Tests/Testcontainers.Floci.Tests.csproj -c Release
 
