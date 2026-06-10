@@ -1,6 +1,6 @@
 name: publish
 
-# Auto-SemVer from Conventional Commits (ietf-tools/semver-action), then publish to the FinLegal
+# Auto-SemVer from Conventional Commits (ietf-tools/semver-action), then publish to the floci-io
 # GitHub Packages feed on every push to main.
 #
 # Commit messages drive the bump: `feat:` -> minor, `fix:`/`perf:`/`refactor:`/`test:` -> patch,
@@ -67,7 +67,7 @@ jobs:
       - name: Push to GitHub Packages
         run: >
           dotnet nuget push "artifacts/*.nupkg"
-          --source https://nuget.pkg.github.com/FinLegal/index.json
+          --source https://nuget.pkg.github.com/floci-io/index.json
           --api-key ${{ secrets.GITHUB_TOKEN }}
           --skip-duplicate
 
