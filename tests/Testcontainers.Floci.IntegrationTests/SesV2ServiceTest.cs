@@ -8,7 +8,11 @@ namespace Testcontainers.Floci.Tests;
 
 public sealed class SesV2ServiceTest : IAsyncLifetime
 {
-    private readonly FlociContainer _floci = new FlociBuilder(TestImages.Floci).Build();
+    // Enable SES v2 explicitly through the builder so the FLOCI_SERVICES_SES_V2_* env keys are
+    // actually emitted and exercised, rather than relying on Floci's default-on behaviour.
+    private readonly FlociContainer _floci = new FlociBuilder(TestImages.Floci)
+        .WithSesV2(new SesV2Config())
+        .Build();
 
     public Task InitializeAsync() => _floci.StartAsync();
 

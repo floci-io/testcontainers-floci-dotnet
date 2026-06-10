@@ -8,19 +8,31 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AWSSDK.CertificateManager" Version="4.0.3" />
     <PackageReference Include="AWSSDK.APIGateway" Version="4.0.3" />
+    <PackageReference Include="AWSSDK.BCMDataExports" Version="4.0.5.5" />
     <PackageReference Include="AWSSDK.ApiGatewayV2" Version="4.0.3" />
     <PackageReference Include="AWSSDK.AppConfig" Version="4.0.3" />
     <PackageReference Include="AWSSDK.AppConfigData" Version="4.0.3" />
+    <PackageReference Include="AWSSDK.AppSync" Version="4.0.3" />
+    <PackageReference Include="AWSSDK.Athena" Version="4.0.3" />
+    <PackageReference Include="AWSSDK.Backup" Version="4.0.3" />
+    <PackageReference Include="AWSSDK.BedrockRuntime" Version="4.0.3" />
     <PackageReference Include="AWSSDK.CloudFormation" Version="4.0.3" />
     <PackageReference Include="AWSSDK.CloudWatch" Version="4.0.3" />
+    <PackageReference Include="AWSSDK.CloudFront" Version="4.0.3" />
     <PackageReference Include="AWSSDK.CloudWatchLogs" Version="4.0.3" />
+    <PackageReference Include="AWSSDK.CodeDeploy" Version="4.0.3" />
+    <PackageReference Include="AWSSDK.ConfigService" Version="4.0.3" />
+    <PackageReference Include="AWSSDK.CostExplorer" Version="4.0.3" />
     <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="4.0.3" />
+    <PackageReference Include="AWSSDK.CostAndUsageReport" Version="4.0.2.4" />
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.3" />
     <PackageReference Include="AWSSDK.EC2" Version="4.0.91" />
     <PackageReference Include="AWSSDK.ECR" Version="4.0.14.1" />
     <PackageReference Include="AWSSDK.ECS" Version="4.0.23.1" />
     <PackageReference Include="AWSSDK.ElastiCache" Version="4.0.5" />
+    <PackageReference Include="AWSSDK.ElasticLoadBalancingV2" Version="4.0.3" />
     <PackageReference Include="AWSSDK.EventBridge" Version="4.0.3" />
     <PackageReference Include="AWSSDK.Glue" Version="4.0.3" />
     <PackageReference Include="AWSSDK.IdentityManagement" Version="4.0.3" />
@@ -28,7 +40,10 @@
     <PackageReference Include="AWSSDK.Kinesis" Version="4.0.3" />
     <PackageReference Include="AWSSDK.KinesisFirehose" Version="4.0.3" />
     <PackageReference Include="AWSSDK.Lambda" Version="4.0.17" />
+    <PackageReference Include="AWSSDK.Pipes" Version="4.0.3" />
+    <PackageReference Include="AWSSDK.Pricing" Version="4.0.3" />
     <PackageReference Include="AWSSDK.RDS" Version="4.0.21" />
+    <PackageReference Include="AWSSDK.Route53" Version="4.0.3" />
     <PackageReference Include="AWSSDK.ResourceGroupsTaggingAPI" Version="4.0.3" />
     <PackageReference Include="AWSSDK.S3" Version="4.0.24" />
     <PackageReference Include="AWSSDK.Scheduler" Version="4.0.3.5" />
@@ -36,7 +51,9 @@
     <PackageReference Include="AWSSDK.SimpleEmail" Version="4.0.3" />
     <PackageReference Include="AWSSDK.SimpleEmailV2" Version="4.0.3" />
     <PackageReference Include="AWSSDK.SimpleNotificationService" Version="4.0.3" />
+    <PackageReference Include="AWSSDK.Transfer" Version="4.0.3" />
     <PackageReference Include="AWSSDK.StepFunctions" Version="4.0.3" />
+    <PackageReference Include="AWSSDK.Textract" Version="4.0.3" />
     <PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="4.0.3" />
     <PackageReference Include="AWSSDK.SQS" Version="4.0.3" />
     <PackageReference Include="coverlet.collector" Version="6.0.4" />

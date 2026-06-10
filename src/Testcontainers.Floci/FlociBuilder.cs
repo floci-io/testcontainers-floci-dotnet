@@ -102,6 +102,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     }
 
     /// <summary>
+    /// Configures Floci's ACM (Certificate Manager) emulation.
+    /// </summary>
+    /// <param name="config">The ACM configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithAcm(AcmConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's API Gateway (v1) emulation.
     /// </summary>
     /// <param name="config">The API Gateway configuration.</param>
@@ -130,11 +137,25 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithAppConfigData(AppConfigDataConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's AppSync emulation.
+    /// </summary>
+    /// <param name="config">The AppSync configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithAppSync(AppSyncConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's CloudFormation emulation.
     /// </summary>
     /// <param name="config">The CloudFormation configuration.</param>
     /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
     public FlociBuilder WithCloudFormation(CloudFormationConfig config) => WithServiceConfig(config);
+
+    /// <summary>
+    /// Configures Floci's Athena emulation.
+    /// </summary>
+    /// <param name="config">The Athena configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithAthena(AthenaConfig config) => WithServiceConfig(config);
 
     /// <summary>
     /// Configures Floci's CloudWatch Logs emulation.
@@ -144,11 +165,25 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithCloudWatchLogs(CloudWatchLogsConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's AWS Backup emulation.
+    /// </summary>
+    /// <param name="config">The Backup configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithBackup(BackupConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's CloudWatch Metrics emulation.
     /// </summary>
     /// <param name="config">The CloudWatch Metrics configuration.</param>
     /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
     public FlociBuilder WithCloudWatchMetrics(CloudWatchMetricsConfig config) => WithServiceConfig(config);
+
+    /// <summary>
+    /// Configures Floci's BCM Data Exports emulation.
+    /// </summary>
+    /// <param name="config">The BCM Data Exports configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithBcmDataExports(BcmDataExportsConfig config) => WithServiceConfig(config);
 
     /// <summary>
     /// Configures Floci's Cognito emulation.
@@ -158,11 +193,25 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithCognito(CognitoConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's Bedrock Runtime emulation.
+    /// </summary>
+    /// <param name="config">The Bedrock Runtime configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithBedrockRuntime(BedrockRuntimeConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's DynamoDB emulation.
     /// </summary>
     /// <param name="config">The DynamoDB configuration.</param>
     /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
     public FlociBuilder WithDynamoDb(DynamoDbConfig config) => WithServiceConfig(config);
+
+    /// <summary>
+    /// Configures Floci's CloudFront emulation.
+    /// </summary>
+    /// <param name="config">The CloudFront configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithCloudFront(CloudFrontConfig config) => WithServiceConfig(config);
 
     /// <summary>
     /// Configures Floci's EC2 emulation. In real mode (the default) the Docker socket is mounted
@@ -173,6 +222,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithEc2(Ec2Config config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's CodeDeploy emulation.
+    /// </summary>
+    /// <param name="config">The CodeDeploy configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithCodeDeploy(CodeDeployConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's ECR emulation. Container-based: mounts the Docker socket and publishes
     /// the registry port range so the backing registry container is reachable from the host.
     /// </summary>
@@ -181,12 +237,26 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithEcr(EcrConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's AWS Config emulation.
+    /// </summary>
+    /// <param name="config">The AWS Config configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithAwsConfig(AwsConfigConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's ECS emulation. In real mode (the default) the Docker socket is mounted
     /// so Floci can spawn task containers; in mock mode no socket is needed.
     /// </summary>
     /// <param name="config">The ECS configuration.</param>
     /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
     public FlociBuilder WithEcs(EcsConfig config) => WithServiceConfig(config);
+
+    /// <summary>
+    /// Configures Floci's Cost Explorer emulation.
+    /// </summary>
+    /// <param name="config">The Cost Explorer configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithCostExplorer(CostExplorerConfig config) => WithServiceConfig(config);
 
     /// <summary>
     /// Configures Floci's ElastiCache emulation. Container-based: mounts the Docker socket and
@@ -198,11 +268,25 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithElastiCache(ElastiCacheConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's Cost and Usage Reports (CUR) emulation.
+    /// </summary>
+    /// <param name="config">The CUR configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithCur(CurConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's EventBridge emulation.
     /// </summary>
     /// <param name="config">The EventBridge configuration.</param>
     /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
     public FlociBuilder WithEventBridge(EventBridgeConfig config) => WithServiceConfig(config);
+
+    /// <summary>
+    /// Configures Floci's ELBv2 (Elastic Load Balancing v2) emulation.
+    /// </summary>
+    /// <param name="config">The ELBv2 configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithElbV2(ElbV2Config config) => WithServiceConfig(config);
 
     /// <summary>
     /// Configures Floci's Firehose emulation.
@@ -212,6 +296,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithFirehose(FirehoseConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's EventBridge Pipes emulation.
+    /// </summary>
+    /// <param name="config">The Pipes configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithPipes(PipesConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's Glue emulation.
     /// </summary>
     /// <param name="config">The Glue configuration.</param>
@@ -219,11 +310,25 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithGlue(GlueConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's Pricing emulation.
+    /// </summary>
+    /// <param name="config">The Pricing configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithPricing(PricingConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's IAM emulation.
     /// </summary>
     /// <param name="config">The IAM configuration.</param>
     /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
     public FlociBuilder WithIam(IamConfig config) => WithServiceConfig(config);
+
+    /// <summary>
+    /// Configures Floci's Route 53 emulation.
+    /// </summary>
+    /// <param name="config">The Route 53 configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithRoute53(Route53Config config) => WithServiceConfig(config);
 
     /// <summary>
     /// Configures Floci's Kinesis emulation.
@@ -238,6 +343,20 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     /// <param name="config">The KMS configuration.</param>
     /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
     public FlociBuilder WithKms(KmsConfig config) => WithServiceConfig(config);
+
+    /// <summary>
+    /// Configures Floci's Textract emulation.
+    /// </summary>
+    /// <param name="config">The Textract configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithTextract(TextractConfig config) => WithServiceConfig(config);
+
+    /// <summary>
+    /// Configures Floci's Transfer Family emulation.
+    /// </summary>
+    /// <param name="config">The Transfer Family configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithTransferFamily(TransferFamilyConfig config) => WithServiceConfig(config);
 
     /// <summary>
     /// Configures Floci's Lambda emulation. Container-based: mounts the Docker socket so Floci can
