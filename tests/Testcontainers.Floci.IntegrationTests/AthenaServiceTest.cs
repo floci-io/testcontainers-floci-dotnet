@@ -27,15 +27,15 @@ public sealed class AthenaServiceTest : IAsyncLifetime
     }
 
     [Fact]
-    public async Task CreatesAndListsWorkGroup()
+    public async Task CreatesAndGetsWorkGroup()
     {
         using var athena = CreateClient();
         const string workGroupName = "test-workgroup";
 
         await athena.CreateWorkGroupAsync(new CreateWorkGroupRequest { Name = workGroupName });
 
-        var response = await athena.ListWorkGroupsAsync(new ListWorkGroupsRequest());
+        var response = await athena.GetWorkGroupAsync(new GetWorkGroupRequest { WorkGroup = workGroupName });
 
-        Assert.Contains(response.WorkGroups, wg => wg.Name == workGroupName);
+        Assert.Equal(workGroupName, response.WorkGroup.Name);
     }
 }

@@ -31,13 +31,25 @@ public sealed class ElbV2ServiceTest : IAsyncLifetime
     }
 
     [Fact]
-    public async Task DescribesLoadBalancers()
+    public async Task CreatesAndDescribesLoadBalancer()
     {
         using var elb = CreateClient();
+        var name = "test-lb";
 
-        var response = await elb.DescribeLoadBalancersAsync(new DescribeLoadBalancersRequest());
+        var created = await elb.CreateLoadBalancerAsync(new CreateLoadBalancerRequest
+        {
+            Name = name,
+            Type = LoadBalancerTypeEnum.Application,
+            Scheme = LoadBalancerSchemeEnum.InternetFacing,
+        });
+        var arn = created.LoadBalancers[0].LoadBalancerArn;
 
-        Assert.NotNull(response.LoadBalancers);
+        var described = await elb.DescribeLoadBalancersAsync(new DescribeLoadBalancersRequest
+        {
+            LoadBalancerArns = new System.Collections.Generic.List<string> { arn },
+        });
+
+        Assert.Contains(described.LoadBalancers, lb => lb.LoadBalancerName == name);
     }
 
     [Fact]

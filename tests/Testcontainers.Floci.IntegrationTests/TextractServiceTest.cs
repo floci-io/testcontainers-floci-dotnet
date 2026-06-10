@@ -27,12 +27,18 @@ public sealed class TextractServiceTest : IAsyncLifetime
     }
 
     [Fact]
-    public async Task ListsAdapters()
+    public async Task DetectsDocumentText()
     {
         using var textract = CreateClient();
 
-        var response = await textract.ListAdaptersAsync(new ListAdaptersRequest());
+        var response = await textract.DetectDocumentTextAsync(new DetectDocumentTextRequest
+        {
+            Document = new Document
+            {
+                S3Object = new Amazon.Textract.Model.S3Object { Bucket = "my-bucket", Name = "test.pdf" },
+            },
+        });
 
-        Assert.NotNull(response.Adapters);
+        Assert.NotEmpty(response.Blocks);
     }
 }

@@ -27,25 +27,60 @@ public sealed class CloudFrontServiceTest : IAsyncLifetime
     }
 
     [Fact]
-    public async Task CreatesAndListsOriginAccessIdentity()
+    public async Task CreatesAndGetsDistribution()
     {
         using var cf = CreateClient();
-        const string comment = "test-oai";
+        const string callerReference = "test-distribution-ref";
 
-        var created = await cf.CreateCloudFrontOriginAccessIdentityAsync(
-            new CreateCloudFrontOriginAccessIdentityRequest
+        var created = await cf.CreateDistributionAsync(new CreateDistributionRequest
+        {
+            DistributionConfig = new DistributionConfig
             {
-                CloudFrontOriginAccessIdentityConfig = new CloudFrontOriginAccessIdentityConfig
+                CallerReference = callerReference,
+                Comment = "Test distribution",
+                Enabled = true,
+                Origins = new Origins
                 {
-                    CallerReference = "test-ref",
-                    Comment = comment,
+                    Quantity = 1,
+                    Items = new System.Collections.Generic.List<Origin>
+                    {
+                        new Origin
+                        {
+                            Id = "test-origin",
+                            DomainName = "example.com",
+                            CustomOriginConfig = new CustomOriginConfig
+                            {
+                                HTTPPort = 80,
+                                HTTPSPort = 443,
+                                OriginProtocolPolicy = OriginProtocolPolicy.HttpOnly,
+                            },
+                        },
+                    },
                 },
-            });
+                // Floci emulates the legacy CloudFront API, which requires MinTTL + ForwardedValues
+                // rather than a CachePolicyId (mirrors the upstream Java test).
+#pragma warning disable CS0618
+                DefaultCacheBehavior = new DefaultCacheBehavior
+                {
+                    TargetOriginId = "test-origin",
+                    ViewerProtocolPolicy = ViewerProtocolPolicy.AllowAll,
+                    MinTTL = 0L,
+                    ForwardedValues = new ForwardedValues
+                    {
+                        QueryString = false,
+                        Cookies = new CookiePreference { Forward = ItemSelection.None },
+                    },
+                    TrustedSigners = new TrustedSigners { Enabled = false, Quantity = 0 },
+                },
+#pragma warning restore CS0618
+            },
+        });
 
-        var list = await cf.ListCloudFrontOriginAccessIdentitiesAsync(
-            new ListCloudFrontOriginAccessIdentitiesRequest());
+        Assert.False(string.IsNullOrEmpty(created.Distribution.Id));
 
-        Assert.Contains(list.CloudFrontOriginAccessIdentityList.Items,
-            i => i.Id == created.CloudFrontOriginAccessIdentity.Id);
+        var got = await cf.GetDistributionAsync(new GetDistributionRequest { Id = created.Distribution.Id });
+
+        Assert.Equal(created.Distribution.Id, got.Distribution.Id);
+        Assert.Equal(callerReference, got.Distribution.DistributionConfig.CallerReference);
     }
 }
