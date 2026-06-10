@@ -39,11 +39,9 @@ jobs:
       - name: Restore
         run: dotnet restore
 
-      # Fast gate only. The integration tests are container-backed (some pull large runtime images
-      # and spawn sibling containers); they run locally / in a separate workflow, not on every
-      # push. The *ConfigTest classes cover the env-var mapping for every service with no Docker.
+      # Fast no-Docker gate (the *ConfigTest unit project). Integration runs on PRs via ci.yml.
       - name: Unit tests
-        run: dotnet test -c Release --filter "FullyQualifiedName~ConfigTest"
+        run: dotnet test tests/Testcontainers.Floci.Tests/Testcontainers.Floci.Tests.csproj -c Release
 
       - name: Compute version (Conventional Commits)
         id: version

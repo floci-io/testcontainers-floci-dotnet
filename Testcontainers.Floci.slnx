@@ -4,5 +4,6 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Testcontainers.Floci.Tests/Testcontainers.Floci.Tests.csproj" />
+    <Project Path="tests/Testcontainers.Floci.IntegrationTests/Testcontainers.Floci.IntegrationTests.csproj" />
   </Folder>
 </Solution>
