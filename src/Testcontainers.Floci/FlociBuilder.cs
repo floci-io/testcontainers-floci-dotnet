@@ -247,6 +247,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithElastiCache(ElastiCacheConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's Cost and Usage Reports (CUR) emulation.
+    /// </summary>
+    /// <param name="config">The CUR configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithCur(CurConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's EventBridge emulation.
     /// </summary>
     /// <param name="config">The EventBridge configuration.</param>

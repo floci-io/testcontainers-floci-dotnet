@@ -23,6 +23,7 @@
     <PackageReference Include="AWSSDK.CodeDeploy" Version="4.0.3" />
     <PackageReference Include="AWSSDK.CostExplorer" Version="4.0.3" />
     <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="4.0.3" />
+    <PackageReference Include="AWSSDK.CostAndUsageReport" Version="4.0.2.4" />
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.3" />
     <PackageReference Include="AWSSDK.EC2" Version="4.0.91" />
     <PackageReference Include="AWSSDK.ECR" Version="4.0.14.1" />
