@@ -11,3 +11,4 @@ opensearchproject/opensearch:2.19.5
 tinkerpop/gremlin-server:3.7.3
 valkey/valkey:8
 registry:2
+rancher/k3s:latest

@@ -260,6 +260,15 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithEcs(EcsConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's EKS emulation. In real mode (the default) the Docker socket is mounted so
+    /// Floci can spawn a k3s container per cluster, publishing its API server on a host port; in
+    /// mock mode clusters return ACTIVE without starting any container.
+    /// </summary>
+    /// <param name="config">The EKS configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithEks(EksConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's Cost Explorer emulation.
     /// </summary>
     /// <param name="config">The Cost Explorer configuration.</param>
