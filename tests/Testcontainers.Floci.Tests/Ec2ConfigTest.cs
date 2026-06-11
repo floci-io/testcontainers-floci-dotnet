@@ -15,7 +15,6 @@ public sealed class Ec2ConfigTest
         Assert.Equal(9169, config.ImdsPort);
         Assert.Equal(2200, config.SshPortRangeStart);
         Assert.Equal(2299, config.SshPortRangeEnd);
-        Assert.True(config.AutoScalingEnabled);
     }
 
     [Fact]
@@ -37,11 +36,12 @@ public sealed class Ec2ConfigTest
         var env = new Ec2Config().BuildEnvironment();
 
         Assert.Equal("true", env["FLOCI_SERVICES_EC2_ENABLED"]);
-        Assert.Equal("true", env["FLOCI_SERVICES_AUTOSCALING_ENABLED"]);
         Assert.Equal("false", env["FLOCI_SERVICES_EC2_MOCK"]);
         Assert.Equal("9169", env["FLOCI_SERVICES_EC2_IMDS_PORT"]);
         Assert.Equal("2200", env["FLOCI_SERVICES_EC2_SSH_PORT_RANGE_START"]);
         Assert.Equal("2299", env["FLOCI_SERVICES_EC2_SSH_PORT_RANGE_END"]);
+        // Auto Scaling is no longer coupled to EC2 — see AutoScalingConfig.
+        Assert.DoesNotContain("FLOCI_SERVICES_AUTOSCALING_ENABLED", env.Keys);
     }
 
     [Fact]
@@ -51,12 +51,10 @@ public sealed class Ec2ConfigTest
         {
             Mock = true,
             ImdsPort = 9200,
-            AutoScalingEnabled = false,
         }.BuildEnvironment();
 
         Assert.Equal("true", env["FLOCI_SERVICES_EC2_MOCK"]);
         Assert.Equal("9200", env["FLOCI_SERVICES_EC2_IMDS_PORT"]);
-        Assert.Equal("false", env["FLOCI_SERVICES_AUTOSCALING_ENABLED"]);
     }
 
     [Fact]
