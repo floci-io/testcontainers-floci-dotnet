@@ -66,8 +66,9 @@ adding its `WithXxx`; Floci enables most services by default regardless.
 
 ### Container-based services
 
-RDS, Lambda, ElastiCache, ECS, EC2 and ECR make Floci spawn **sibling containers** (a real
-Postgres, a Lambda runtime, a Valkey, etc.). The module mounts the Docker socket and publishes the
+RDS, ElastiCache, Lambda, ECS, EC2, ECR, MSK, OpenSearch, Neptune, EKS and CodeBuild make Floci
+spawn **sibling containers** (a real Postgres, a Lambda runtime, a Valkey, a Redpanda broker, an
+OpenSearch node, a k3s cluster, etc.). The module mounts the Docker socket and publishes the
 needed ports automatically. A few practical notes when using them:
 
 - Connect to spawned backends via `127.0.0.1` (not `localhost`) to avoid IPv6 resolution.
@@ -81,14 +82,18 @@ needed ports automatically. A few practical notes when using them:
 ## Supported services
 
 **Flat services** (single endpoint): S3, SQS, SNS, DynamoDB, Secrets Manager, SSM, KMS,
-EventBridge, IAM, Kinesis, CloudWatch Logs, CloudWatch Metrics, SES, Step Functions, Glue,
-Cognito, CloudFormation, API Gateway (v1 & v2), Resource Groups Tagging, Firehose.
+EventBridge, EventBridge Pipes, EventBridge Scheduler, IAM, Kinesis, Firehose, CloudWatch Logs,
+CloudWatch Metrics, SES, SES v2, Step Functions, Glue, Cognito, CloudFormation, API Gateway
+(v1 & v2), Resource Groups Tagging, ACM, Route 53, CloudFront, ELBv2, Athena, AppConfig, AppConfig
+Data, AppSync, CodeDeploy, Bedrock Runtime, Textract, Transcribe, AWS Config, Auto Scaling, Backup,
+Transfer Family, Cost Explorer, Cost & Usage Reports (CUR), Pricing, BCM Data Exports.
 
 **Container-based services** (spawn real backing containers): RDS (Postgres/MySQL/MariaDB),
-ElastiCache (Valkey/Redis & Memcached), Lambda (real function execution), ECS, EC2, ECR.
+ElastiCache (Valkey/Redis & Memcached), Lambda (real function execution), ECS, EC2, ECR, MSK
+(Redpanda), OpenSearch, Neptune (Gremlin), EKS (k3s), CodeBuild.
 
-STS works out of the box (always on; no config). Every service has both fast config unit tests and
-a live integration test.
+STS works out of the box (always on; no config). That's full parity with Floci's emulated
+services. Every service has both fast config unit tests and a live integration test.
 
 ## Consuming from GitHub Packages
 

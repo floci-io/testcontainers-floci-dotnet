@@ -11,8 +11,8 @@ Intended to be contributed upstream to the `floci-io` org.
   - `FlociServiceConfig` — base record for per-service config
   - `SqsConfig` — the **reference implementation** of the per-service template
 - `tests/Testcontainers.Floci.Tests/` — xUnit tests (net10.0)
-- Local read-only references (not in this repo): `~/repos/_reference/testcontainers-floci`
-  (Java) and `~/repos/_reference/testcontainers-floci-python`. Port from these.
+- Local read-only reference (not in this repo): the upstream Java module at
+  `~/repos/testcontainers-floci`. Port from it (read `XxxConfig.java` + its tests per service).
 
 ## Build & test
 
@@ -69,7 +69,8 @@ once `dotnet test` is green.
   only when enabled. Top-level: `FLOCI_DEFAULT_REGION` / `FLOCI_DEFAULT_ACCOUNT_ID` /
   `FLOCI_DEFAULT_AVAILABILITY_ZONE`. Verified against the running image — match Java keys exactly.
 - Endpoint is `GetEndpoint()` (`http://host:mappedPort/`); credentials are dummy `test`/`test`.
-- Image: `floci/floci:latest`, port 4566, native arm64.
+- Image: pinned `floci/floci:1.5.22` (the `FlociBuilder` default and `TestImages.Floci`; keep the
+  two in sync, and in sync with `.github/docker-images.txt` for the CI cache), port 4566, native arm64.
 
 ## Gotchas
 
