@@ -369,6 +369,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithTextract(TextractConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's Transcribe emulation.
+    /// </summary>
+    /// <param name="config">The Transcribe configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithTranscribe(TranscribeConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's Transfer Family emulation.
     /// </summary>
     /// <param name="config">The Transfer Family configuration.</param>
