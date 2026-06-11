@@ -56,6 +56,7 @@
     <PackageReference Include="AWSSDK.SimpleEmail" Version="4.0.3" />
     <PackageReference Include="AWSSDK.SimpleEmailV2" Version="4.0.3" />
     <PackageReference Include="AWSSDK.SimpleNotificationService" Version="4.0.3" />
+    <PackageReference Include="AWSSDK.TranscribeService" Version="4.0.7.3" />
     <PackageReference Include="AWSSDK.Transfer" Version="4.0.3" />
     <PackageReference Include="AWSSDK.StepFunctions" Version="4.0.3" />
     <PackageReference Include="AWSSDK.Textract" Version="4.0.3" />
