@@ -105,8 +105,12 @@ once `dotnet test` is green.
     that isn't tied to a repository, and Floci's `KEEP_RUNNING_ON_SHUTDOWN=false` graceful stop
     doesn't fire under Testcontainers' abrupt kill — so it lingers after tests. It's *reused*
     (fixed name) on subsequent runs, so it doesn't accumulate or collide; just be aware it stays up.
-  - **EC2 Auto Scaling env key**: Floci namespaces it separately (`FLOCI_SERVICES_AUTOSCALING_ENABLED`,
-    not under EC2) and upstream emits it unconditionally; `Ec2Config` emits it when EC2 is enabled.
+  - **EC2 Auto Scaling is its own service**: Floci namespaces it separately
+    (`FLOCI_SERVICES_AUTOSCALING_ENABLED`, not under EC2), enables it by default, and its control
+    plane works independently of EC2. It has its own `AutoScalingConfig` / `WithAutoScaling` — the
+    sole owner of the key. (`Ec2Config` deliberately does **not** emit it, to avoid a double-write;
+    EC2 users still get Auto Scaling via Floci's default-on.) This diverges from upstream Java,
+    which has no `AutoScalingConfig` and emits the key from its EC2 config.
 - **Test parallelization is disabled** (`AssemblyInfo.cs`, `DisableTestParallelization = true`):
   container-backed tests starting many Floci containers at once flake under Docker-daemon load.
 

@@ -36,11 +36,6 @@ public sealed record Ec2Config : FlociServiceConfig
     /// </summary>
     public int SshPortRangeEnd { get; init; } = 2299;
 
-    /// <summary>
-    /// Gets a value indicating whether EC2 Auto Scaling is enabled. Defaults to <see langword="true" />.
-    /// </summary>
-    public bool AutoScalingEnabled { get; init; } = true;
-
     /// <inheritdoc />
     protected override string ServiceKey => "EC2";
 
@@ -53,10 +48,8 @@ public sealed record Ec2Config : FlociServiceConfig
     /// <inheritdoc />
     protected override void AddSettings(IDictionary<string, string> env, string prefix)
     {
-        // Floci namespaces the Auto Scaling toggle separately (FLOCI_SERVICES_AUTOSCALING_*), not
-        // under EC2. Upstream emits it unconditionally; we emit it whenever EC2 is enabled, which
-        // is the only case that matters in practice.
-        env["FLOCI_SERVICES_AUTOSCALING_ENABLED"] = AutoScalingEnabled ? "true" : "false";
+        // Auto Scaling is a separate Floci service (FLOCI_SERVICES_AUTOSCALING_*), enabled by
+        // default and configured via AutoScalingConfig / WithAutoScaling — not coupled to EC2.
         env[prefix + "MOCK"] = Mock ? "true" : "false";
         env[prefix + "IMDS_PORT"] = ImdsPort.ToString(CultureInfo.InvariantCulture);
         env[prefix + "SSH_PORT_RANGE_START"] = SshPortRangeStart.ToString(CultureInfo.InvariantCulture);

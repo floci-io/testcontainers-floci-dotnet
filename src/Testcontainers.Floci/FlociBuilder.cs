@@ -144,6 +144,14 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithAppSync(AppSyncConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's EC2 Auto Scaling emulation. Auto Scaling is a standalone service in Floci
+    /// (independent of EC2) and is enabled by default.
+    /// </summary>
+    /// <param name="config">The Auto Scaling configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithAutoScaling(AutoScalingConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's CloudFormation emulation.
     /// </summary>
     /// <param name="config">The CloudFormation configuration.</param>
