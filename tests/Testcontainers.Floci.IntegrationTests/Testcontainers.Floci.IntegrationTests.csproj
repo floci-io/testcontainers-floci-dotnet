@@ -29,11 +29,11 @@
     <PackageReference Include="AWSSDK.CostExplorer" Version="4.0.13.3" />
     <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="4.0.9.4" />
     <PackageReference Include="AWSSDK.CostAndUsageReport" Version="4.0.2.4" />
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.21.1" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.21.2" />
     <PackageReference Include="AWSSDK.EC2" Version="4.0.93" />
     <PackageReference Include="AWSSDK.ECR" Version="4.0.14.4" />
     <PackageReference Include="AWSSDK.ECS" Version="4.0.24" />
-    <PackageReference Include="AWSSDK.EKS" Version="4.0.17.6" />
+    <PackageReference Include="AWSSDK.EKS" Version="4.0.18" />
     <PackageReference Include="AWSSDK.ElastiCache" Version="4.0.5.3" />
     <PackageReference Include="AWSSDK.ElasticLoadBalancingV2" Version="4.0.7.4" />
     <PackageReference Include="AWSSDK.EventBridge" Version="4.0.6.5" />
@@ -44,7 +44,7 @@
     <PackageReference Include="AWSSDK.Kinesis" Version="4.0.9.3" />
     <PackageReference Include="AWSSDK.KinesisFirehose" Version="4.0.4.3" />
     <PackageReference Include="AWSSDK.Lambda" Version="4.0.17.3" />
-    <PackageReference Include="AWSSDK.Neptune" Version="4.0.6.3" />
+    <PackageReference Include="AWSSDK.Neptune" Version="4.0.7" />
     <PackageReference Include="AWSSDK.OpenSearchService" Version="4.0.22.5" />
     <PackageReference Include="AWSSDK.Pipes" Version="4.0.3.5" />
     <PackageReference Include="AWSSDK.Pricing" Version="4.0.5.6" />
