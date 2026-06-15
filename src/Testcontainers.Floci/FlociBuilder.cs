@@ -159,6 +159,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithCloudFormation(CloudFormationConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's CloudTrail emulation.
+    /// </summary>
+    /// <param name="config">The CloudTrail configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithCloudTrail(CloudTrailConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's Athena emulation.
     /// </summary>
     /// <param name="config">The Athena configuration.</param>
