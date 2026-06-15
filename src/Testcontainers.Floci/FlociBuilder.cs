@@ -454,6 +454,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithRds(RdsConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's RDS Data API emulation.
+    /// </summary>
+    /// <param name="config">The RDS Data API configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithRdsData(RdsDataConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's Resource Groups Tagging emulation.
     /// </summary>
     /// <param name="config">The Resource Groups Tagging configuration.</param>
