@@ -510,6 +510,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithStepFunctions(StepFunctionsConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's WAF v2 emulation.
+    /// </summary>
+    /// <param name="config">The WAF v2 configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithWafV2(WafV2Config config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's SQS emulation.
     /// </summary>
     /// <param name="config">The SQS configuration.</param>

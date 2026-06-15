@@ -61,6 +61,7 @@
     <PackageReference Include="AWSSDK.SimpleNotificationService" Version="4.0.3.3" />
     <PackageReference Include="AWSSDK.TranscribeService" Version="4.0.7.3" />
     <PackageReference Include="AWSSDK.Transfer" Version="4.0.10.3" />
+    <PackageReference Include="AWSSDK.WAFV2" Version="4.0.9.5" />
     <PackageReference Include="AWSSDK.StepFunctions" Version="4.0.4.3" />
     <PackageReference Include="AWSSDK.Textract" Version="4.0.4.6" />
     <PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="4.0.8.3" />
