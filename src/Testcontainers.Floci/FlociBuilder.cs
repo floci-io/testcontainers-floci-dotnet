@@ -291,6 +291,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithEks(EksConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's EMR (Elastic MapReduce) emulation.
+    /// </summary>
+    /// <param name="config">The EMR configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithEmr(EmrConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's Cost Explorer emulation.
     /// </summary>
     /// <param name="config">The Cost Explorer configuration.</param>

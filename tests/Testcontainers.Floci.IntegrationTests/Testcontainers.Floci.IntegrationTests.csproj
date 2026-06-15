@@ -36,6 +36,7 @@
     <PackageReference Include="AWSSDK.ECS" Version="4.0.24" />
     <PackageReference Include="AWSSDK.EKS" Version="4.0.17.6" />
     <PackageReference Include="AWSSDK.ElastiCache" Version="4.0.5.3" />
+    <PackageReference Include="AWSSDK.ElasticMapReduce" Version="4.0.11.4" />
     <PackageReference Include="AWSSDK.ElasticLoadBalancingV2" Version="4.0.7.4" />
     <PackageReference Include="AWSSDK.EventBridge" Version="4.0.6.5" />
     <PackageReference Include="AWSSDK.Glue" Version="4.0.31.3" />
