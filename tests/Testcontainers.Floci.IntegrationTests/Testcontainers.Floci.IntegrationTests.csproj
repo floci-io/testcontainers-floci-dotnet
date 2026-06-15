@@ -55,6 +55,7 @@
     <PackageReference Include="AWSSDK.S3" Version="4.0.24.3" />
     <PackageReference Include="AWSSDK.Scheduler" Version="4.0.3.5" />
     <PackageReference Include="AWSSDK.SecretsManager" Version="4.0.5.3" />
+    <PackageReference Include="AWSSDK.ServiceDiscovery" Version="4.0.3.6" />
     <PackageReference Include="AWSSDK.SimpleEmail" Version="4.0.3.3" />
     <PackageReference Include="AWSSDK.SimpleEmailV2" Version="4.0.14.4" />
     <PackageReference Include="AWSSDK.SimpleNotificationService" Version="4.0.3.3" />
