@@ -11,22 +11,24 @@ using Xunit;
 
 namespace Testcontainers.Floci.Tests;
 
-// NOTE: ExecuteStatement is skipped due to a Floci 1.5.25 native-image bug.
+// NOTE: ExecuteStatement is skipped due to a Floci native-image bug (present in 1.5.25).
 //
-// Floci's RDS Data API implementation (floci/floci#1262) uses DriverManager.getConnection
-// with jdbc:mysql:// URLs. The published Docker Hub image is a GraalVM native binary, and the
-// MySQL JDBC driver (mysql-connector-j) is not registered in the native-image resource
-// configuration (META-INF/services/java.sql.Driver is absent from resource-config.json).
-// This causes every ExecuteStatement call against a MySQL/MariaDB cluster to fail with
-// "No suitable driver found for jdbc:mysql://...".
+// Floci's RDS Data API (floci-io/floci#1262) opens jdbc:mysql:// connections via
+// DriverManager. In the published GraalVM native image the MySQL driver never registers
+// itself: DriverManager is initialised at build time, so its registered-driver list is frozen
+// before Connector/J runs its self-registration static initialiser. Every ExecuteStatement
+// against a MySQL/MariaDB cluster therefore fails with "No suitable driver found for
+// jdbc:mysql://...". (The JVM build is unaffected, which is why Floci's own compatibility tests
+// don't catch it.)
 //
-// Floci's own compatibility tests run against a JVM build (docker/Dockerfile.jvm-package,
-// using `java -jar quarkus-app/quarkus-run.jar`), where ServiceLoader auto-discovery works.
-// The native build published to Docker Hub is missing this registration.
+// Reported and fixed upstream:
+//   - bug: https://github.com/floci-io/floci/issues/1354
+//   - fix: https://github.com/floci-io/floci/pull/1355 (adds the quarkus-jdbc-mysql extension)
+// Verified locally: a native build with that change turns this test green. Registering the
+// java.sql.Driver service resource alone is NOT sufficient — it doesn't affect the build-time
+// DriverManager initialisation.
 //
-// Re-enable the [Fact] and remove the [Fact(Skip=...)] once this is fixed upstream.
-// See: https://github.com/hectorvent/floci/blob/main/src/main/resources/META-INF/native-image/resource-config.json
-// Fix would add: {"pattern":"META-INF/services/java.sql.Driver"} to the resources.includes array.
+// Remove the [Fact(Skip=...)] and bump TestImages.Floci once a Floci release includes the fix.
 public sealed class RdsDataServiceTest : IAsyncLifetime
 {
     private const string ClusterId = "rds-data-test-cluster";
@@ -125,7 +127,7 @@ public sealed class RdsDataServiceTest : IAsyncLifetime
             });
     }
 
-    [Fact(Skip = "Floci 1.5.25 native-image bug: mysql-connector-j not registered for native JDBC access — see comment above. Remove Skip when upstream fixes resource-config.json.")]
+    [Fact(Skip = "Floci native-image bug: MySQL JDBC driver not registered (floci-io/floci#1354; fixed by #1355). See comment above. Remove once a Floci release includes the fix.")]
     public async Task ExecutesStatementAgainstMysqlCluster()
     {
         // Step 1: Create an aurora-mysql cluster. Floci spawns a mysql:8.0 sibling container
