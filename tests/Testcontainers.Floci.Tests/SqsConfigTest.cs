@@ -12,8 +12,8 @@ public sealed class SqsConfigTest
 
         Assert.True(config.Enabled);
         Assert.Equal(30, config.VisibilityTimeout);
-        Assert.Equal(262144, config.MaxMessageSize);
-        Assert.True(config.ClearFifoDeduplicationCacheOnPurge);
+        Assert.Equal(1048576, config.MaxMessageSize);
+        Assert.False(config.ClearFifoDeduplicationCacheOnPurge);
     }
 
     [Fact]
@@ -23,8 +23,8 @@ public sealed class SqsConfigTest
 
         Assert.Equal("true", env["FLOCI_SERVICES_SQS_ENABLED"]);
         Assert.Equal("30", env["FLOCI_SERVICES_SQS_DEFAULT_VISIBILITY_TIMEOUT"]);
-        Assert.Equal("262144", env["FLOCI_SERVICES_SQS_MAX_MESSAGE_SIZE"]);
-        Assert.Equal("true", env["FLOCI_SERVICES_SQS_CLEAR_FIFO_DEDUPLICATION_CACHE_ON_PURGE"]);
+        Assert.Equal("1048576", env["FLOCI_SERVICES_SQS_MAX_MESSAGE_SIZE"]);
+        Assert.Equal("false", env["FLOCI_SERVICES_SQS_CLEAR_FIFO_DEDUPLICATION_CACHE_ON_PURGE"]);
     }
 
     [Fact]
