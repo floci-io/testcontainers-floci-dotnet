@@ -7,5 +7,5 @@ namespace Testcontainers.Floci.Tests;
 /// </summary>
 internal static class TestImages
 {
-    public const string Floci = "floci/floci:1.5.22";
+    public const string Floci = "floci/floci:1.5.25";
 }

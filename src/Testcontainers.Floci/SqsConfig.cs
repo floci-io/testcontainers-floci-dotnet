@@ -24,15 +24,15 @@ public sealed record SqsConfig : FlociServiceConfig
     public int VisibilityTimeout { get; init; } = 30;
 
     /// <summary>
-    /// Gets the maximum message size in bytes. Defaults to <c>262144</c> (256 KiB).
+    /// Gets the maximum message size in bytes. Defaults to <c>1048576</c> (1 MiB).
     /// </summary>
-    public int MaxMessageSize { get; init; } = 262144;
+    public int MaxMessageSize { get; init; } = 1048576;
 
     /// <summary>
     /// Gets a value indicating whether the FIFO deduplication cache is cleared on queue purge.
-    /// Defaults to <see langword="true" />.
+    /// Defaults to <see langword="false" />.
     /// </summary>
-    public bool ClearFifoDeduplicationCacheOnPurge { get; init; } = true;
+    public bool ClearFifoDeduplicationCacheOnPurge { get; init; } = false;
 
     /// <inheritdoc />
     protected override string ServiceKey => "SQS";
