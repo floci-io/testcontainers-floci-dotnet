@@ -50,6 +50,7 @@
     <PackageReference Include="AWSSDK.Pipes" Version="4.0.3.5" />
     <PackageReference Include="AWSSDK.Pricing" Version="4.0.5.6" />
     <PackageReference Include="AWSSDK.RDS" Version="4.0.21.3" />
+    <PackageReference Include="AWSSDK.RDSDataService" Version="4.0.3.5" />
     <PackageReference Include="AWSSDK.Route53" Version="4.0.9.3" />
     <PackageReference Include="AWSSDK.ResourceGroupsTaggingAPI" Version="4.0.4.3" />
     <PackageReference Include="AWSSDK.S3" Version="4.0.24.3" />
