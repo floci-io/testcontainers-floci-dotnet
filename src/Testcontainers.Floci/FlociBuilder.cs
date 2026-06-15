@@ -194,6 +194,13 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public FlociBuilder WithBackup(BackupConfig config) => WithServiceConfig(config);
 
     /// <summary>
+    /// Configures Floci's AWS Batch emulation.
+    /// </summary>
+    /// <param name="config">The Batch configuration.</param>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    public FlociBuilder WithBatch(BatchConfig config) => WithServiceConfig(config);
+
+    /// <summary>
     /// Configures Floci's CloudWatch Metrics emulation.
     /// </summary>
     /// <param name="config">The CloudWatch Metrics configuration.</param>
