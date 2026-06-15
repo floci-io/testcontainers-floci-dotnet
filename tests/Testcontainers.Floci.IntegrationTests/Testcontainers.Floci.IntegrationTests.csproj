@@ -18,6 +18,7 @@
     <PackageReference Include="AWSSDK.Athena" Version="4.0.5.4" />
     <PackageReference Include="AWSSDK.AutoScaling" Version="4.0.11.4" />
     <PackageReference Include="AWSSDK.Backup" Version="4.0.13.5" />
+    <PackageReference Include="AWSSDK.Batch" Version="4.0.10.6" />
     <PackageReference Include="AWSSDK.BedrockRuntime" Version="4.0.20.5" />
     <PackageReference Include="AWSSDK.CloudFormation" Version="4.0.9.3" />
     <PackageReference Include="AWSSDK.CloudTrail" Version="4.0.6" />
