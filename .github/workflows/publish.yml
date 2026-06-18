@@ -73,7 +73,7 @@ jobs:
           --skip-duplicate
 
       - name: Tag + release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ steps.version.outputs.nextStrict }}
           name: v${{ steps.version.outputs.nextStrict }}
