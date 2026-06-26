@@ -56,7 +56,7 @@ jobs:
       # after pulling — before the tests run — and therefore persists even if a test later fails.
       - name: Restore Docker image cache
         id: docker-cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: ~/docker-images
           key: docker-images-v1-${{ hashFiles('.github/docker-images.txt') }}
@@ -76,7 +76,7 @@ jobs:
 
       - name: Save Docker image cache
         if: steps.docker-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: ~/docker-images
           key: docker-images-v1-${{ hashFiles('.github/docker-images.txt') }}
