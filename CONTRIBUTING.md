@@ -83,6 +83,17 @@ the version that `publish.yml` ships automatically on every push to `main`.
 Docs/metadata-only pushes (`**.md`, `LICENSE`, `.gitignore`) don't cut a release — see the `paths-ignore`
 in [`publish.yml`](.github/workflows/publish.yml).
 
+## Pull Request Limits and Review Bandwidth
+
+To make sure every contribution gets a thorough, high-quality review in a reasonable time, we ask contributors to keep **no more than 2 open, non-draft pull requests** at any time in this repository.
+
+- **Why this policy exists:** maintainer review time is limited. Capping concurrent open PRs prevents review backlogs, reduces context switching, and keeps PR cycle times short for everyone.
+- **Dependent work:** if your work depends on a PR that has not been merged yet, build on that branch or note the dependency in the discussion instead of opening separate, uncoordinated PRs.
+- **Draft PRs:** drafts do not count against the limit. Mark a draft as ready for review only when you have review capacity available.
+- **How it is applied:** a bot labels your 3rd and later open pull requests `over-pr-limit` with a reminder. Starting **2026-10-08**, from your 5th open pull request onward, new ones are closed automatically. Your branch and commits are kept, and you can reopen the PR once one of your other PRs is merged or closed. Maintainers and dependency bots are not counted.
+
+Once your current pull requests are reviewed, merged, or closed, you are welcome to open new ones!
+
 ## Releases
 
 Releases are automated. A push to `main` computes the next version from the commit history, tags it, creates a
