@@ -22,3 +22,4 @@
 - [ ] `dotnet test` passes (unit always; integration if Docker-affecting — needs Docker)
 - [ ] New or changed behaviour is covered by tests
 - [ ] Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `chore:`, etc.)
+- [ ] I have no more than 2 open, non-draft pull requests in this repository (maintainers and dependency bots are exempt).
