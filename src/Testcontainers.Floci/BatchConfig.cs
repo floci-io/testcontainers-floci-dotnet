@@ -9,7 +9,7 @@ namespace Testcontainers.Floci;
 /// <remarks>
 /// Apply via <see cref="FlociBuilder.WithBatch(BatchConfig)" />:
 /// <code>
-/// await using var floci = new FlociBuilder("floci/floci:1.5.25")
+/// await using var floci = new FlociBuilder("floci/floci:x.y.z")
 ///     .WithBatch(new BatchConfig())
 ///     .Build();
 /// </code>
