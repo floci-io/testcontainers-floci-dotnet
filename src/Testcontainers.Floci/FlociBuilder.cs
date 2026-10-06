@@ -16,7 +16,7 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     /// <summary>
     /// The default Floci image.
     /// </summary>
-    [Obsolete("Pass the image to a constructor instead, e.g. new FlociBuilder(\"floci/floci:1.5.22\"). A baked-in default image will be removed in a future version.")]
+    [Obsolete("Pass the image to a constructor instead, e.g. new FlociBuilder(\"floci/floci:x.y.z\"). A baked-in default image will be removed in a future version.")]
     public const string FlociImage = DefaultImage;
 
     /// <summary>
@@ -27,7 +27,7 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     /// <summary>
     /// Initializes a new instance of the <see cref="FlociBuilder" /> class using the default image.
     /// </summary>
-    [Obsolete("Use a constructor that takes the image, e.g. new FlociBuilder(\"floci/floci:1.5.22\"). The parameterless constructor will be removed in a future version.")]
+    [Obsolete("Use a constructor that takes the image, e.g. new FlociBuilder(\"floci/floci:x.y.z\"). The parameterless constructor will be removed in a future version.")]
     public FlociBuilder()
         : this(DefaultImage)
     {
@@ -37,7 +37,7 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     /// Initializes a new instance of the <see cref="FlociBuilder" /> class.
     /// </summary>
     /// <param name="image">
-    /// The full Docker image name, including repository and tag (e.g. <c>floci/floci:1.5.22</c>).
+    /// The full Docker image name, including repository and tag (e.g. <c>floci/floci:x.y.z</c>).
     /// This also lets you point at a private registry mirror.
     /// </param>
     public FlociBuilder(string image)

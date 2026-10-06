@@ -20,3 +20,6 @@ coverage*.info
 
 ## OS
 .DS_Store
+
+# Local scratch: backlog, plans, notes (never committed)
+/local/

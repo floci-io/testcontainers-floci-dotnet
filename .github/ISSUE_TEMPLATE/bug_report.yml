@@ -20,7 +20,7 @@ body:
     attributes:
       label: Floci Docker image
       description: The `floci/floci` image tag in use, if you overrode the default.
-      placeholder: "e.g. floci/floci:1.5.22"
+      placeholder: "e.g. floci/floci:x.y.z"
 
   - type: input
     id: tfm
