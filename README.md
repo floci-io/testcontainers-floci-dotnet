@@ -62,6 +62,11 @@ popcorn.
 dotnet add package Testcontainers.Floci
 ```
 
+> **Moving to nuget.org.** The 0.16.x line below is published to the floci-io GitHub Packages feed as
+> `Testcontainers.Floci`. The next major release, 1.0.0, moves to nuget.org as `Floci.Testcontainers.Aws`
+> (plus `Floci.Testcontainers.Core`), and these instructions will change with it: no feed or token setup
+> will be needed. Until then, keep using the GitHub Packages setup below.
+
 The package is published to the floci-io GitHub Packages feed (not nuget.org). See
 [Consuming from GitHub Packages](#consuming-from-github-packages) for the one-time `nuget.config`
 setup required.
