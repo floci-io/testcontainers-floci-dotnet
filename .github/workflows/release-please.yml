@@ -1,0 +1,125 @@
+name: Release Please
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: >-
+          Existing release tag to (re)publish and security-scan (e.g. v0.17.0), bypassing the
+          release-please gate. Use this to recover a release whose tag/GitHub Release was created
+          out-of-band (so release-please never reported release_created=true) or to re-run a failed
+          publish/security-scan job. Leave empty to run release-please normally: it may update the
+          release PR, or tag and publish a release PR that has been merged.
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  # Step 1: Maintain the release PR (version bump in Directory.Build.props + changelog) and, once it
+  # is merged, tag the release and create the GitHub Release.
+  release-please:
+    # A tag recovery skips this job, so a release-please failure (e.g. an expired GH_TOKEN) cannot
+    # block re-publishing an existing tag.
+    if: inputs.tag == ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    outputs:
+      release-created: ${{ steps.release.outputs.release_created }}
+      tag-name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        id: release
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          target-branch: main
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  # Step 2: Pack the release tag and publish to the floci-io GitHub Packages feed
+  # (nuget.org with trusted publishing follows the Floci.Testcontainers.* rename).
+  publish:
+    needs: release-please
+    if: >-
+      !cancelled() && (inputs.tag != '' ||
+      (needs.release-please.result == 'success' && needs.release-please.outputs.release-created == 'true'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ inputs.tag || needs.release-please.outputs.tag-name }}
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      - name: Unit tests
+        run: dotnet test tests/Testcontainers.Floci.Tests/Testcontainers.Floci.Tests.csproj -c Release
+
+      - name: Pack
+        env:
+          TAG: ${{ inputs.tag || needs.release-please.outputs.tag-name }}
+        # The version comes from the tag, so re-publishing a tag from before Directory.Build.props
+        # carried it cannot pack the release as the SDK default 1.0.0.
+        run: dotnet pack src/Testcontainers.Floci/Testcontainers.Floci.csproj -c Release -o artifacts -p:Version="${TAG#v}"
+
+      - name: Push to GitHub Packages
+        run: >
+          dotnet nuget push "artifacts/*.nupkg"
+          --source https://nuget.pkg.github.com/floci-io/index.json
+          --api-key ${{ secrets.GITHUB_TOKEN }}
+          --skip-duplicate
+
+  # Step 3: Run security scanners against the release tag
+  security-scan:
+    needs: release-please
+    if: >-
+      !cancelled() && (inputs.tag != '' ||
+      (needs.release-please.result == 'success' && needs.release-please.outputs.release-created == 'true'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      security-events: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ inputs.tag || needs.release-please.outputs.tag-name }}
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        with:
+          languages: csharp
+          build-mode: manual
+
+      - name: Build for analysis
+        run: dotnet build Testcontainers.Floci.slnx -c Release
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy

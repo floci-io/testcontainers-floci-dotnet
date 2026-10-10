@@ -1,0 +1,14 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "release-type": "simple",
+  "changelog-path": "CHANGELOG.md",
+  "include-component-in-tag": false,
+  "last-release-sha": "38119886e64833e00a11b3b2df0a71ff9ce02c22",
+  "packages": {
+    ".": {
+      "extra-files": [
+        "Directory.Build.props"
+      ]
+    }
+  }
+}

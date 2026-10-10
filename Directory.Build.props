@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <!-- Package version for every project in the solution, bumped by release-please (see release-please-config.json). Do not edit by hand. -->
+    <Version>0.16.5</Version> <!-- x-release-please-version -->
+  </PropertyGroup>
+</Project>

@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/floci-io/testcontainers-floci-dotnet/actions/workflows/publish.yml"><img src="https://github.com/floci-io/testcontainers-floci-dotnet/actions/workflows/publish.yml/badge.svg" alt="publish"></a>
+  <a href="https://github.com/floci-io/testcontainers-floci-dotnet/actions/workflows/release-please.yml"><img src="https://github.com/floci-io/testcontainers-floci-dotnet/actions/workflows/release-please.yml/badge.svg" alt="publish"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-green" alt="License: MIT"></a>
   <a href="https://github.com/floci-io/testcontainers-floci-dotnet/stargazers"><img src="https://img.shields.io/github/stars/floci-io/testcontainers-floci-dotnet?style=flat" alt="GitHub Stars"></a>
 </p>
