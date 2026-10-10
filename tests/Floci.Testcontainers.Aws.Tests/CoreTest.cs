@@ -86,12 +86,18 @@ public sealed class CoreTest
     [Fact]
     public void GivesEachContainerAUniqueOverridableResourceNamespace()
     {
-        var a = new FlociBuilder(Image);
-        var b = new FlociBuilder(Image);
+        // Build picks the namespace, so two containers from one builder get different ones.
+        var builder = new FlociBuilder(Image);
+        var first = builder.WithDefaultResourceNamespace().ResourceNamespace;
+        var second = builder.WithDefaultResourceNamespace().ResourceNamespace;
 
-        Assert.Matches("^tc-[0-9a-f]{8}$", a.ResourceNamespace);
-        Assert.NotEqual(a.ResourceNamespace, b.ResourceNamespace);
-        Assert.Equal("ci-42", a.WithResourceNamespace("ci-42").ResourceNamespace);
+        Assert.Null(builder.ResourceNamespace);
+        Assert.Matches("^tc-[0-9a-f]{8}$", first);
+        Assert.NotEqual(first, second);
+
+        // A namespace the caller sets, either way, is kept.
+        Assert.Equal("ci-42", builder.WithResourceNamespace("ci-42").WithDefaultResourceNamespace().ResourceNamespace);
+        Assert.Equal("ci-43", builder.WithEnvironment(AwsCloud.Descriptor.ResourceNamespaceEnv, "ci-43").WithDefaultResourceNamespace().ResourceNamespace);
     }
 
     private static FlociBuilder WithoutSocketServices() => new FlociBuilder(Image)

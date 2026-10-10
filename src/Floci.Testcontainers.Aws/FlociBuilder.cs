@@ -602,8 +602,9 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     }
 
     /// <summary>
-    /// Sets the prefix of the sibling containers' names. Each builder starts with a unique
-    /// <c>tc-xxxxxxxx</c> one, so parallel test runs never collide.
+    /// Sets the prefix of the sibling containers' names. Without it, each <see cref="Build" /> picks
+    /// a unique <c>tc-xxxxxxxx</c> one, so containers never share sibling names, even when built
+    /// from the same builder.
     /// </summary>
     /// <param name="resourceNamespace">The namespace.</param>
     /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
@@ -613,10 +614,22 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     }
 
     /// <summary>
-    /// Gets the resource namespace the built container will use.
+    /// Gets the resource namespace set so far, or <see langword="null" /> when <see cref="Build" />
+    /// will pick a fresh one.
     /// </summary>
     internal string? ResourceNamespace =>
         DockerResourceConfiguration.Environments.TryGetValue(AwsCloud.Descriptor.ResourceNamespaceEnv, out var ns) ? ns : null;
+
+    /// <summary>
+    /// Returns this builder with a fresh resource namespace unless one is already set (through
+    /// <see cref="WithResourceNamespace" /> or <c>WithEnvironment</c>). <see cref="Build" /> calls it,
+    /// so every built container gets its own.
+    /// </summary>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    internal FlociBuilder WithDefaultResourceNamespace()
+    {
+        return ResourceNamespace is null ? WithResourceNamespace(CloudDescriptor.NewNamespace()) : this;
+    }
 
     /// <summary>
     /// Gets the host Docker socket the built container will mount, or <see langword="null" />.
@@ -639,8 +652,9 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public override FlociContainer Build()
     {
         Validate();
-        var socket = DockerSocketMount();
-        var builder = socket is null ? this : WithBindMount(socket, FlociHost.ContainerDockerSocket);
+        var builder = WithDefaultResourceNamespace();
+        var socket = builder.DockerSocketMount();
+        builder = socket is null ? builder : builder.WithBindMount(socket, FlociHost.ContainerDockerSocket);
         return new FlociContainer(builder.DockerResourceConfiguration);
     }
 
@@ -649,7 +663,6 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     {
         return base.Init()
             .WithPortBinding(FlociPort, true)
-            .WithEnvironment(AwsCloud.Descriptor.ResourceNamespaceEnv, CloudDescriptor.NewNamespace())
             .WithWaitStrategy(Wait.ForUnixContainer()
                 .UntilHttpRequestIsSucceeded(request => request.ForPath(AwsCloud.Descriptor.HealthPath).ForPort(FlociPort)));
     }
