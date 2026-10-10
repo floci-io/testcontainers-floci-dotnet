@@ -109,8 +109,10 @@ This project uses [Conventional Commits](https://www.conventionalcommits.org/), 
 Releases follow the same release-please flow as the Java module (`.github/workflows/release-please.yml`):
 every push to `main` updates one **release PR** with the next version and the `CHANGELOG.md` entry, and
 nothing is published until a maintainer merges it. Merging tags `vX.Y.Z`, creates the GitHub release,
-packs the solution and pushes it to the floci-io GitHub Packages feed, and runs the security scans
-(CodeQL, Trivy) against the tag.
+packs the packages and pushes them to nuget.org, and runs the security scans (CodeQL, Trivy) against the tag.
+Publishing uses nuget.org trusted publishing: a policy owned by the `floci` organization trusts this
+workflow for the `Floci.Testcontainers.*` packages, so no API key is stored. The repository variable
+`NUGET_USER` names the nuget.org account that created the policy.
 
 | Prefix | Version bump | Example |
 |---|---|---|

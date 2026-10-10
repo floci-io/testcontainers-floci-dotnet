@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
+      id-token: write # nuget.org trusted publishing exchanges the GitHub OIDC token for a short-lived key
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -71,11 +71,25 @@ jobs:
         # carried it cannot pack the release as the SDK default 1.0.0.
         run: dotnet pack src/Testcontainers.Floci/Testcontainers.Floci.csproj -c Release -o artifacts -p:Version="${TAG#v}"
 
-      - name: Push to GitHub Packages
+      - name: Check the nuget.org user is configured
+        env:
+          NUGET_USER: ${{ vars.NUGET_USER }}
+        run: |
+          [ -n "$NUGET_USER" ] || { echo "::error::Set the repository variable NUGET_USER to the nuget.org username that created the trusted publishing policy."; exit 1; }
+
+      # The nuget.org trusted publishing policy (owner floci, packages Floci.Testcontainers.*) trusts
+      # this workflow file; NuGet/login trades the job's OIDC token for an API key valid for one hour.
+      - name: Log in to nuget.org
+        id: nuget-login
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
+        with:
+          user: ${{ vars.NUGET_USER }}
+
+      - name: Push to nuget.org
         run: >
           dotnet nuget push "artifacts/*.nupkg"
-          --source https://nuget.pkg.github.com/floci-io/index.json
-          --api-key ${{ secrets.GITHUB_TOKEN }}
+          --source https://api.nuget.org/v3/index.json
+          --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
           --skip-duplicate
 
   # Step 3: Run security scanners against the release tag
