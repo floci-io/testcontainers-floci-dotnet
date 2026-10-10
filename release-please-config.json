@@ -3,6 +3,7 @@
   "release-type": "simple",
   "changelog-path": "CHANGELOG.md",
   "include-component-in-tag": false,
+  "signoff": "Hector Ventura <hectorvent@gmail.com>",
   "last-release-sha": "38119886e64833e00a11b3b2df0a71ff9ce02c22",
   "packages": {
     ".": {
