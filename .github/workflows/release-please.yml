@@ -62,14 +62,16 @@ jobs:
           global-json-file: global.json
 
       - name: Unit tests
-        run: dotnet test tests/Testcontainers.Floci.Tests/Testcontainers.Floci.Tests.csproj -c Release
+        run: dotnet test tests/Floci.Testcontainers.Aws.Tests/Floci.Testcontainers.Aws.Tests.csproj -c Release
 
       - name: Pack
         env:
           TAG: ${{ inputs.tag || needs.release-please.outputs.tag-name }}
         # The version comes from the tag, so re-publishing a tag from before Directory.Build.props
         # carried it cannot pack the release as the SDK default 1.0.0.
-        run: dotnet pack src/Testcontainers.Floci/Testcontainers.Floci.csproj -c Release -o artifacts -p:Version="${TAG#v}"
+        run: |
+          dotnet pack src/Floci.Testcontainers.Core/Floci.Testcontainers.Core.csproj -c Release -o artifacts -p:Version="${TAG#v}"
+          dotnet pack src/Floci.Testcontainers.Aws/Floci.Testcontainers.Aws.csproj -c Release -o artifacts -p:Version="${TAG#v}"
 
       - name: Check the nuget.org user is configured
         env:
@@ -118,7 +120,7 @@ jobs:
           build-mode: manual
 
       - name: Build for analysis
-        run: dotnet build Testcontainers.Floci.slnx -c Release
+        run: dotnet build Floci.Testcontainers.slnx -c Release
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2

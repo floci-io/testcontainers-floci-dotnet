@@ -51,7 +51,7 @@ popcorn.
 
 | Emulator                                           | Cloud | Port | Supported                                       |
 |----------------------------------------------------|-------|:----:|:-----------------------------------------------:|
-| [floci](https://github.com/floci-io/floci)         | AWS   | 4566 | ✅ [`Testcontainers.Floci`](#installation)       |
+| [floci](https://github.com/floci-io/floci)         | AWS   | 4566 | ✅ [`Floci.Testcontainers.Aws`](#installation)   |
 | [floci-az](https://github.com/floci-io/floci-az)   | Azure | 4577 | Planned                                         |
 | [floci-gcp](https://github.com/floci-io/floci-gcp) | GCP   | 4588 | Planned                                         |
 | [floci-oci](https://github.com/floci-io/floci-oci) | OCI   | 4599 | Planned                                         |
@@ -59,59 +59,37 @@ popcorn.
 ## Installation
 
 ```bash
-dotnet add package Testcontainers.Floci
+dotnet add package Floci.Testcontainers.Aws
 ```
 
-> **Moving to nuget.org.** The 0.16.x line below is published to the floci-io GitHub Packages feed as
-> `Testcontainers.Floci`. The next major release, 1.0.0, moves to nuget.org as `Floci.Testcontainers.Aws`
-> (plus `Floci.Testcontainers.Core`), and these instructions will change with it: no feed or token setup
-> will be needed. Until then, keep using the GitHub Packages setup below.
+`Floci.Testcontainers.Aws` brings in `Floci.Testcontainers.Core`, the shared part every Floci cloud
+package builds on. Code lives in the `Floci.Testcontainers.Aws` namespace.
 
-The package is published to the floci-io GitHub Packages feed (not nuget.org). See
-[Consuming from GitHub Packages](#consuming-from-github-packages) for the one-time `nuget.config`
-setup required.
+The packages are published to [nuget.org](https://www.nuget.org/packages/Floci.Testcontainers.Aws), so no
+feed or token setup is needed.
 
-### Consuming from GitHub Packages
+### Migrating from `Testcontainers.Floci`
 
-The package id is `Testcontainers.Floci`, the same id as the minimal official package on
-nuget.org, so consumers **must** use NuGet
-[package source mapping](https://learn.microsoft.com/nuget/consume-packages/package-source-mapping)
-to route that id to the floci-io feed. Add a `nuget.config` to the consuming repo:
+Up to 0.16.x the package was `Testcontainers.Floci`, an id that belongs to the official
+testcontainers-dotnet module on nuget.org. From 1.0.0 it is `Floci.Testcontainers.Aws`:
 
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<configuration>
-  <packageSources>
-    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
-    <add key="github-floci-io" value="https://nuget.pkg.github.com/floci-io/index.json" />
-  </packageSources>
-  <packageSourceCredentials>
-    <github-floci-io>
-      <add key="Username" value="%GITHUB_ACTOR%" />
-      <add key="ClearTextPassword" value="%GITHUB_PACKAGES_PAT%" />
-    </github-floci-io>
-  </packageSourceCredentials>
-  <packageSourceMapping>
-    <!-- Route ONLY our package to the floci-io feed; everything else to nuget.org. -->
-    <packageSource key="github-floci-io">
-      <package pattern="Testcontainers.Floci" />
-    </packageSource>
-    <packageSource key="nuget.org">
-      <package pattern="*" />
-    </packageSource>
-  </packageSourceMapping>
-</configuration>
-```
+1. Replace the package reference: `dotnet remove package Testcontainers.Floci`, then
+   `dotnet add package Floci.Testcontainers.Aws`. The 0.16.x line was published to the floci-io GitHub
+   Packages feed; 1.0.0 and later come from nuget.org, so the floci-io feed, its credentials and its
+   `packageSourceMapping` entry can be removed from `nuget.config`. Without that mapping, NuGet could also
+   resolve `Testcontainers.Floci` from nuget.org, where that id is the unrelated official module.
+2. Replace `using Testcontainers.Floci;` with `using Floci.Testcontainers.Aws;`.
 
-`GITHUB_PACKAGES_PAT` is a PAT with `read:packages`. **The `packageSourceMapping` block is
-required**: without it, NuGet may resolve `Testcontainers.Floci` from nuget.org (the unrelated,
-minimal official package) instead of ours.
+The types (`FlociBuilder`, `FlociContainer`, every `*Config`) keep their names and behaviour, with one
+difference: the Docker socket is now decided from the container's final environment, so it is
+mounted by default (see [Container-based services](#container-based-services)).
 
 ### Versioning
 
-Releases are auto-versioned from [Conventional Commits](https://www.conventionalcommits.org/) on
-`main`: `feat:` → minor, `fix:`/`perf:`/`refactor:`/`test:` → patch, `!`/`BREAKING CHANGE` → major.
-Other commits still ship a patch. Write conventional commit messages for meaningful version bumps.
+Releases are cut with [release-please](https://github.com/googleapis/release-please), as in the Java
+module. Each [Conventional Commit](https://www.conventionalcommits.org/) merged to `main` updates one
+release PR (`feat:` → minor, `fix:`/`perf:` → patch, `!`/`BREAKING CHANGE` → major). A release happens
+when a maintainer merges that PR.
 
 ## Quick start
 
@@ -182,14 +160,18 @@ ElastiCache (Valkey/Redis & Memcached), Lambda (real function execution), ECS, E
 (Redpanda), OpenSearch, Neptune (Gremlin), EKS (k3s), CodeBuild, Batch.
 
 STS works out of the box (always on; no config). The authoritative list of config records is the
-set of `*Config.cs` files in [`src/Testcontainers.Floci`](src/Testcontainers.Floci).
+set of `*Config.cs` files in [`src/Floci.Testcontainers.Aws`](src/Floci.Testcontainers.Aws).
 
 ### Container-based services
 
 Container-based services make Floci spawn **sibling containers** (a real Postgres, a Lambda
 runtime, a Valkey, a Redpanda broker, an OpenSearch node, a k3s cluster, etc.). The module mounts
-the Docker socket (only while such a service is enabled) and publishes the needed ports
-automatically. A few practical notes when using them:
+the Docker socket when an enabled service needs it and publishes the needed ports automatically.
+The decision reads the container's final environment, including raw `WithEnvironment` overrides.
+Floci enables every service by default, so the socket is mounted unless those services are disabled
+or mocked; `WithoutDockerSocket()` and `WithDockerSocket(path)` force the choice either way. Each
+container also gets a unique resource namespace (`tc-xxxxxxxx`) that prefixes the sibling containers'
+names, so parallel test runs never collide. A few practical notes when using them:
 
 - Connect to spawned backends via `127.0.0.1` (not `localhost`) to avoid IPv6 resolution.
 - On macOS, RDS's default proxy base port `7000` collides with Control Center (AirPlay); set
@@ -210,6 +192,11 @@ automatically. A few practical notes when using them:
 | `AccountId`           | Configured default AWS account ID                                  | `000000000000` |
 | `AccessKey`           | AWS access key                                                     | `test`         |
 | `SecretKey`           | AWS secret key                                                     | `test`         |
+| `ResourceNamespace`   | Prefix of the sibling containers' names                            | `tc-` + 8 hex  |
+| `ResetAsync()`        | Wipes all emulator state without restarting (Floci 1.5.29+)        | —              |
+
+Builder options beyond the per-service configs: `WithRegion`, `WithAccountId`, `WithAvailabilityZone`,
+`WithResourceNamespace`, `WithDockerSocket(path)` and `WithoutDockerSocket()`.
 
 Readiness is determined by polling Floci's `/_floci/health` endpoint on port 4566, which is
 mapped to a random host port.
@@ -233,7 +220,7 @@ the floating `latest` tag; the .NET builder's baked-in default is a **pinned** t
 version in favour of always passing the image, so new code should not rely on them.
 
 The tag this repository's integration tests run against is declared in
-[`TestImages.cs`](tests/Testcontainers.Floci.IntegrationTests/TestImages.cs). The images cached
+[`TestImages.cs`](tests/Floci.Testcontainers.Aws.IntegrationTests/TestImages.cs). The images cached
 by CI are listed in [`.github/docker-images.txt`](.github/docker-images.txt).
 
 ## Requirements
@@ -249,9 +236,9 @@ dotnet test   # requires a running Docker daemon
 ```
 
 Unit tests (`*ConfigTest`, no Docker) live in
-[`tests/Testcontainers.Floci.Tests`](tests/Testcontainers.Floci.Tests) and integration tests
+[`tests/Floci.Testcontainers.Aws.Tests`](tests/Floci.Testcontainers.Aws.Tests) and integration tests
 (`*ServiceTest`, real Floci containers) in
-[`tests/Testcontainers.Floci.IntegrationTests`](tests/Testcontainers.Floci.IntegrationTests).
+[`tests/Floci.Testcontainers.Aws.IntegrationTests`](tests/Floci.Testcontainers.Aws.IntegrationTests).
 Test parallelization is disabled in the integration project on purpose: container-backed tests
 flake under Docker daemon load. See [CONTRIBUTING.md](CONTRIBUTING.md) for the project layout,
 the branching model, and how to add a service.

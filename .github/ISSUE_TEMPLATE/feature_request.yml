@@ -1,5 +1,5 @@
 name: Feature Request
-description: Suggest a new feature or improvement for Testcontainers.Floci
+description: Suggest a new feature or improvement for Floci.Testcontainers
 labels: ["enhancement"]
 body:
   - type: markdown

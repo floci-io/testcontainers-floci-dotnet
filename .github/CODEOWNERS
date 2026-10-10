@@ -17,4 +17,4 @@
 # CI, release automation, workflow hygiene
 /.github/                    @hectorvent
 /global.json                 @hectorvent
-/Testcontainers.Floci.slnx   @hectorvent
+/Floci.Testcontainers.slnx   @hectorvent
