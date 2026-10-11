@@ -1,17 +1,12 @@
 name: ci
 
 # Runs on every PR: a no-Docker unit job and a container-backed integration job, in parallel.
+# The workflow always runs, because `integration` is a required check: skipping the whole workflow
+# (paths-ignore) left docs-only PRs blocked forever. The `changes` job skips the test jobs instead,
+# and a job skipped by its `if:` counts as passing for required checks.
 on:
   pull_request:
     branches: [ main ]
-    # Skip the build/test suite for changes that can't affect it: docs and repo furniture.
-    # Ignore all of .github/ EXCEPT workflows, so changes to the workflows still run CI.
-    paths-ignore:
-      - '**.md'
-      - 'LICENSE'
-      - '.gitignore'
-      - '.github/**'
-      - '!.github/workflows/**'
 
 permissions:
   contents: read
@@ -21,7 +16,40 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Whether the build and tests are needed: not for docs and repo furniture (Markdown, LICENSE,
+  # .gitignore, and .github/ except its workflows and the pinned test images, which still run them).
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Check the changed files
+        id: filter
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          code=false
+          while IFS= read -r f; do
+            [ -n "$f" ] || continue
+            case "$f" in
+              .github/workflows/* | .github/docker-images.txt) code=true ;;
+              *.md | LICENSE | .gitignore | .github/*) ;;
+              *) code=true ;;
+            esac
+            echo "$f"
+          done < <(git diff --name-only "$BASE...$HEAD")
+          echo "code=$code" | tee -a "$GITHUB_OUTPUT"
+
   unit:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -39,6 +67,8 @@ jobs:
         run: dotnet test tests/Floci.Testcontainers.Aws.Tests/Floci.Testcontainers.Aws.Tests.csproj -c Release --no-build
 
   integration:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
