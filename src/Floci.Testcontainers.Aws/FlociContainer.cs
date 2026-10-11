@@ -72,4 +72,27 @@ public sealed class FlociContainer : DockerContainer
     {
         return FlociHost.ResetAsync(AwsCloud.Descriptor, GetEndpoint(), ct);
     }
+
+    /// <summary>
+    /// Stops and removes the emulator, then removes the sibling containers it spawned (those
+    /// labelled with its <see cref="ResourceNamespace" />). Containers sharing a namespace set
+    /// through <see cref="FlociBuilder.WithResourceNamespace" /> lose their siblings too.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous dispose operation.</returns>
+    protected override async ValueTask DisposeAsyncCore()
+    {
+        try
+        {
+            await base.DisposeAsyncCore().ConfigureAwait(false);
+        }
+        finally
+        {
+            var resourceNamespace = ResourceNamespace;
+            if (!string.IsNullOrEmpty(resourceNamespace))
+            {
+                await FlociHost.RemoveSiblingContainersAsync(_configuration.DockerEndpointAuthConfig, resourceNamespace!)
+                    .ConfigureAwait(false);
+            }
+        }
+    }
 }

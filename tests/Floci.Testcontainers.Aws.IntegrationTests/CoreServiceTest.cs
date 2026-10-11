@@ -1,10 +1,11 @@
 using System.Threading.Tasks;
+using Amazon.SQS;
+using Amazon.SQS.Model;
 using Floci.Testcontainers.Aws;
 using Xunit;
 
 namespace Floci.Testcontainers.Aws.Tests;
 
-// ResetAsync is not covered here yet: it needs floci/floci 1.5.29+, newer than TestImages.Floci.
 public sealed class CoreServiceTest : IAsyncLifetime
 {
     private readonly FlociContainer _floci = new FlociBuilder(TestImages.Floci).Build();
@@ -12,6 +13,21 @@ public sealed class CoreServiceTest : IAsyncLifetime
     public Task InitializeAsync() => _floci.StartAsync();
 
     public Task DisposeAsync() => _floci.DisposeAsync().AsTask();
+
+    [Fact]
+    public async Task ResetWipesStateWithoutRestarting()
+    {
+        using var sqs = new AmazonSQSClient(
+            _floci.AccessKey,
+            _floci.SecretKey,
+            new AmazonSQSConfig { ServiceURL = _floci.GetEndpoint(), AuthenticationRegion = _floci.Region });
+        await sqs.CreateQueueAsync(new CreateQueueRequest { QueueName = "reset-me" });
+
+        await _floci.ResetAsync();
+
+        var queues = await sqs.ListQueuesAsync(new ListQueuesRequest());
+        Assert.Empty(queues.QueueUrls ?? new System.Collections.Generic.List<string>());
+    }
 
     [Fact]
     public void HasAUniqueResourceNamespace()

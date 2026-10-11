@@ -1,4 +1,3 @@
-using System.Linq;
 using Floci.Testcontainers.Aws;
 using Xunit;
 
@@ -23,12 +22,14 @@ public sealed class EcrConfigTest
     }
 
     [Fact]
-    public void IsContainerBasedAndPublishesRegistryPortRange()
+    public void IsContainerBasedAndLeavesTheRegistryPortsToTheRegistry()
     {
         var config = new EcrConfig();
 
         Assert.True(config.RequiresDockerAccess);
-        Assert.Equal(Enumerable.Range(5100, 10), config.FixedHostPorts);
+        // The registry is a sibling container that publishes its own host port, as in the Java
+        // module. Publishing the range on the Floci container too leaves the registry no free port.
+        Assert.Empty(config.FixedHostPorts);
     }
 
     [Fact]

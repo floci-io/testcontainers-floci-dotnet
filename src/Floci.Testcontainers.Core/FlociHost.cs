@@ -1,7 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Docker.DotNet;
+using Docker.DotNet.Models;
+using DotNet.Testcontainers.Configurations;
 using JetBrains.Annotations;
 
 namespace Floci.Testcontainers.Core;
@@ -19,6 +23,12 @@ public static class FlociHost
     private static readonly HttpClient Http = new();
 
     /// <summary>
+    /// The label Floci puts on every sibling container it spawns, holding the emulator's
+    /// <c>DOCKER_RESOURCE_NAMESPACE</c>.
+    /// </summary>
+    public const string NamespaceLabel = "floci_namespace";
+
+    /// <summary>
     /// Gets the host Docker socket to mount: <c>TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE</c> when set
     /// (Colima and other VMs expose the in-VM socket path there), otherwise
     /// <see cref="ContainerDockerSocket" />.
@@ -28,6 +38,55 @@ public static class FlociHost
     {
         var socketPath = Environment.GetEnvironmentVariable("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE");
         return string.IsNullOrEmpty(socketPath) ? ContainerDockerSocket : socketPath!;
+    }
+
+    /// <summary>
+    /// Removes the sibling containers Floci spawned under <paramref name="resourceNamespace" />.
+    /// Floci manages them itself and the Testcontainers resource reaper does not track them, so
+    /// without this they outlive the emulator: a leaked ECR registry, for one, keeps its fixed host
+    /// port and makes the next emulator's registry fail to start. Failures are ignored, since this
+    /// runs during disposal.
+    /// </summary>
+    /// <param name="endpoint">The Docker endpoint the emulator ran on.</param>
+    /// <param name="resourceNamespace">The emulator's resource namespace.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>A task that completes once the siblings are removed.</returns>
+    public static async Task RemoveSiblingContainersAsync(
+        IDockerEndpointAuthenticationConfiguration endpoint,
+        string resourceNamespace,
+        CancellationToken ct = default)
+    {
+        try
+        {
+            using var client = endpoint.GetDockerClientBuilder(Guid.NewGuid()).Build();
+            var siblings = await client.Containers.ListContainersAsync(
+                new ContainersListParameters
+                {
+                    All = true,
+                    Filters = new Dictionary<string, IDictionary<string, bool>>
+                    {
+                        ["label"] = new Dictionary<string, bool> { [NamespaceLabel + "=" + resourceNamespace] = true },
+                    },
+                },
+                ct).ConfigureAwait(false);
+
+            foreach (var sibling in siblings)
+            {
+                try
+                {
+                    await client.Containers.RemoveContainerAsync(
+                        sibling.ID, new ContainerRemoveParameters { Force = true, RemoveVolumes = true }, ct).ConfigureAwait(false);
+                }
+                catch (DockerApiException)
+                {
+                    // Already gone, or Floci removed it concurrently.
+                }
+            }
+        }
+        catch (Exception exception) when (exception is DockerApiException or HttpRequestException or TimeoutException)
+        {
+            // Best effort: never fail a test's teardown over leftover siblings.
+        }
     }
 
     /// <summary>

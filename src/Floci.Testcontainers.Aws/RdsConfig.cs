@@ -54,6 +54,13 @@ public sealed record RdsConfig : FlociServiceConfig
     public string? DockerNetwork { get; init; }
 
     /// <summary>
+    /// Gets the hostname Floci advertises in RDS endpoints, or <see langword="null" /> to advertise
+    /// the Docker host that publishes the proxy ports, so clients on the host can connect. Mirrors
+    /// the Java module's <c>endpointHost</c>; the builder fills in the Docker host when this is unset.
+    /// </summary>
+    public string? EndpointHost { get; init; }
+
+    /// <summary>
     /// Gets the highest port in the RDS proxy port range.
     /// </summary>
     public int ProxyMaxPort => ProxyBasePort + ProxyPortsCount - 1;
@@ -80,6 +87,11 @@ public sealed record RdsConfig : FlociServiceConfig
         if (!string.IsNullOrEmpty(DockerNetwork))
         {
             env[prefix + "DOCKER_NETWORK"] = DockerNetwork!;
+        }
+
+        if (!string.IsNullOrEmpty(EndpointHost))
+        {
+            env[prefix + "ENDPOINT_HOST"] = EndpointHost!;
         }
     }
 }

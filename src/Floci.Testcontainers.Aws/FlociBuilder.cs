@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
 using Docker.DotNet.Models;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Configurations;
@@ -11,7 +13,7 @@ namespace Floci.Testcontainers.Aws;
 [PublicAPI]
 public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer, FlociConfiguration>
 {
-    private const string DefaultImage = "floci/floci:1.5.22";
+    private const string DefaultImage = "floci/floci:2.2.0";
 
     /// <summary>
     /// The default Floci image.
@@ -614,6 +616,61 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     }
 
     /// <summary>
+    /// Gets the container environment as it stands.
+    /// </summary>
+    internal IReadOnlyDictionary<string, string> Environments => DockerResourceConfiguration.Environments;
+
+    /// <summary>
+    /// Points RDS endpoints at the Docker host, as the Java module does, unless RDS is disabled or
+    /// <see cref="RdsConfig.EndpointHost" /> (or a raw <c>FLOCI_SERVICES_RDS_ENDPOINT_HOST</c>) is set.
+    /// Without it Floci advertises the database container's bridge address, which only a Linux host
+    /// can reach. Inside a container (Docker-in-Docker) that bridge address is the reachable one, so
+    /// nothing is set there.
+    /// </summary>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    internal FlociBuilder WithReachableRdsEndpoint()
+    {
+        var env = DockerResourceConfiguration.Environments;
+        var key = AwsCloud.Descriptor.ServiceEnv("RDS", "ENDPOINT_HOST");
+        if (env.ContainsKey(key)
+            || (env.TryGetValue(AwsCloud.Descriptor.ServiceEnv("RDS", "ENABLED"), out var enabled)
+                && !string.Equals(enabled, "true", StringComparison.OrdinalIgnoreCase)))
+        {
+            return this;
+        }
+
+        var host = DockerHost(
+            TestcontainersSettings.DockerHostOverride,
+            File.Exists("/.dockerenv"),
+            DockerResourceConfiguration.DockerEndpointAuthConfig?.Endpoint);
+        return host is null ? this : WithEnvironment(key, host);
+    }
+
+    /// <summary>
+    /// Gets the host a test process reaches published ports on: the Testcontainers host override,
+    /// otherwise nothing inside a container (the bridge address is the reachable one there),
+    /// otherwise the host of a tcp/http Docker endpoint, otherwise <c>127.0.0.1</c>.
+    /// </summary>
+    /// <param name="hostOverride">The Testcontainers host override, if any.</param>
+    /// <param name="inContainer">Whether this process runs inside a container.</param>
+    /// <param name="endpoint">The Docker endpoint.</param>
+    /// <returns>The host, or <see langword="null" /> to leave Floci's default.</returns>
+    internal static string? DockerHost(string? hostOverride, bool inContainer, Uri? endpoint)
+    {
+        if (!string.IsNullOrEmpty(hostOverride))
+        {
+            return hostOverride;
+        }
+
+        if (inContainer)
+        {
+            return null;
+        }
+
+        return endpoint is not null && endpoint.Scheme is "tcp" or "http" or "https" ? endpoint.Host : "127.0.0.1";
+    }
+
+    /// <summary>
     /// Gets the resource namespace set so far, or <see langword="null" /> when <see cref="Build" />
     /// will pick a fresh one.
     /// </summary>
@@ -652,7 +709,7 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public override FlociContainer Build()
     {
         Validate();
-        var builder = WithDefaultResourceNamespace();
+        var builder = WithDefaultResourceNamespace().WithReachableRdsEndpoint();
         var socket = builder.DockerSocketMount();
         builder = socket is null ? builder : builder.WithBindMount(socket, FlociHost.ContainerDockerSocket);
         return new FlociContainer(builder.DockerResourceConfiguration);
