@@ -7,5 +7,5 @@ namespace Floci.Testcontainers.Aws.Tests;
 /// </summary>
 internal static class TestImages
 {
-    public const string Floci = "floci/floci:1.5.25";
+    public const string Floci = "floci/floci:2.2.0";
 }

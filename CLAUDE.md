@@ -78,7 +78,7 @@ once `dotnet test` is green.
   only when enabled. Top-level: `FLOCI_DEFAULT_REGION` / `FLOCI_DEFAULT_ACCOUNT_ID` /
   `FLOCI_DEFAULT_AVAILABILITY_ZONE`. Verified against the running image — match Java keys exactly.
 - Endpoint is `GetEndpoint()` (`http://host:mappedPort/`); credentials are dummy `test`/`test`.
-- Image: pinned `floci/floci:1.5.22` (the `FlociBuilder` default and `TestImages.Floci`; keep the
+- Image: pinned `floci/floci:2.2.0` (the `FlociBuilder` default and `TestImages.Floci`; keep the
   two in sync, and in sync with `.github/docker-images.txt` for the CI cache), port 4566, native arm64.
 
 ## Gotchas

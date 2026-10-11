@@ -11,24 +11,6 @@ using Xunit;
 
 namespace Floci.Testcontainers.Aws.Tests;
 
-// NOTE: ExecuteStatement is skipped due to a Floci native-image bug (present in 1.5.25).
-//
-// Floci's RDS Data API (floci-io/floci#1262) opens jdbc:mysql:// connections via
-// DriverManager. In the published GraalVM native image the MySQL driver never registers
-// itself: DriverManager is initialised at build time, so its registered-driver list is frozen
-// before Connector/J runs its self-registration static initialiser. Every ExecuteStatement
-// against a MySQL/MariaDB cluster therefore fails with "No suitable driver found for
-// jdbc:mysql://...". (The JVM build is unaffected, which is why Floci's own compatibility tests
-// don't catch it.)
-//
-// Reported and fixed upstream:
-//   - bug: https://github.com/floci-io/floci/issues/1354
-//   - fix: https://github.com/floci-io/floci/pull/1355 (adds the quarkus-jdbc-mysql extension)
-// Verified locally: a native build with that change turns this test green. Registering the
-// java.sql.Driver service resource alone is NOT sufficient — it doesn't affect the build-time
-// DriverManager initialisation.
-//
-// Remove the [Fact(Skip=...)] and bump TestImages.Floci once a Floci release includes the fix.
 public sealed class RdsDataServiceTest : IAsyncLifetime
 {
     private const string ClusterId = "rds-data-test-cluster";
@@ -127,7 +109,7 @@ public sealed class RdsDataServiceTest : IAsyncLifetime
             });
     }
 
-    [Fact(Skip = "Floci native-image bug: MySQL JDBC driver not registered (floci-io/floci#1354; fixed by #1355). See comment above. Remove once a Floci release includes the fix.")]
+    [Fact]
     public async Task ExecutesStatementAgainstMysqlCluster()
     {
         // Step 1: Create an aurora-mysql cluster. Floci spawns a mysql:8.0 sibling container

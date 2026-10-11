@@ -9,6 +9,8 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Amazon.EKS;
 using Amazon.EKS.Model;
+using Amazon.IdentityManagement;
+using Amazon.IdentityManagement.Model;
 using Floci.Testcontainers.Aws;
 using Xunit;
 
@@ -23,7 +25,26 @@ public sealed class EksServiceTest : IAsyncLifetime
         .WithEks(new EksConfig())
         .Build();
 
-    public Task InitializeAsync() => _floci.StartAsync();
+    private string _tokenAccessKeyId = string.Empty;
+    private string _tokenSecretAccessKey = string.Empty;
+
+    public async Task InitializeAsync()
+    {
+        await _floci.StartAsync();
+
+        // Floci's EKS token validator rejects the seeded "test"/"test" credentials outright (a
+        // publicly known secret must not mint cluster-admin tokens), so mint a dedicated IAM access
+        // key to sign the EKS bearer token with instead, as the Java module does.
+        using var iam = new AmazonIdentityManagementServiceClient(
+            _floci.AccessKey,
+            _floci.SecretKey,
+            new AmazonIdentityManagementServiceConfig { ServiceURL = _floci.GetEndpoint(), AuthenticationRegion = _floci.Region });
+        const string userName = "eks-test-user";
+        await iam.CreateUserAsync(new CreateUserRequest { UserName = userName });
+        var accessKey = (await iam.CreateAccessKeyAsync(new CreateAccessKeyRequest { UserName = userName })).AccessKey;
+        _tokenAccessKeyId = accessKey.AccessKeyId;
+        _tokenSecretAccessKey = accessKey.SecretAccessKey;
+    }
 
     public async Task DisposeAsync()
     {
@@ -181,7 +202,7 @@ public sealed class EksServiceTest : IAsyncLifetime
             ["Action"] = "GetCallerIdentity",
             ["Version"] = "2011-06-15",
             ["X-Amz-Algorithm"] = "AWS4-HMAC-SHA256",
-            ["X-Amz-Credential"] = $"{_floci.AccessKey}/{dateStamp}/{region}/{service}/aws4_request",
+            ["X-Amz-Credential"] = $"{_tokenAccessKeyId}/{dateStamp}/{region}/{service}/aws4_request",
             ["X-Amz-Date"] = amzDate,
             ["X-Amz-Expires"] = "900",
             ["X-Amz-SignedHeaders"] = "host;x-k8s-aws-id",
@@ -196,7 +217,7 @@ public sealed class EksServiceTest : IAsyncLifetime
         var signingKey = HmacSha256(
             HmacSha256(
                 HmacSha256(
-                    HmacSha256(Encoding.UTF8.GetBytes("AWS4" + _floci.SecretKey), dateStamp),
+                    HmacSha256(Encoding.UTF8.GetBytes("AWS4" + _tokenSecretAccessKey), dateStamp),
                     region),
                 service),
             "aws4_request");
