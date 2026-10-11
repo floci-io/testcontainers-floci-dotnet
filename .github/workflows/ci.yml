@@ -35,6 +35,9 @@ jobs:
           HEAD: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
+          # A failed comparison stops this job (and the test jobs then run anyway, see below);
+          # --no-renames lists both sides of a rename, so moving code to a .md path still counts.
+          changed=$(git diff --no-renames --name-only "$BASE...$HEAD")
           code=false
           while IFS= read -r f; do
             [ -n "$f" ] || continue
@@ -44,12 +47,14 @@ jobs:
               *) code=true ;;
             esac
             echo "$f"
-          done < <(git diff --name-only "$BASE...$HEAD")
+          done <<< "$changed"
           echo "code=$code" | tee -a "$GITHUB_OUTPUT"
 
   unit:
     needs: changes
-    if: needs.changes.outputs.code == 'true'
+    # Run when the filter says so, and also whenever the filter itself did not succeed: an unknown
+    # change set is tested, so the required check never passes without running the tests.
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.code == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -68,7 +73,9 @@ jobs:
 
   integration:
     needs: changes
-    if: needs.changes.outputs.code == 'true'
+    # Run when the filter says so, and also whenever the filter itself did not succeed: an unknown
+    # change set is tested, so the required check never passes without running the tests.
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.code == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
