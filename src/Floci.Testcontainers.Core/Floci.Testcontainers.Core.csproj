@@ -13,6 +13,7 @@
     <Authors>Floci and its contributors</Authors>
     <Description>Shared core of the Floci Testcontainers modules for .NET: the cloud descriptor, Docker socket detection and the per-service config base. Use a cloud package such as Floci.Testcontainers.Aws.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/floci-io/testcontainers-floci-dotnet</PackageProjectUrl>
     <RepositoryUrl>https://github.com/floci-io/testcontainers-floci-dotnet</RepositoryUrl>
     <PackageTags>testcontainers;floci;emulator;testing;docker</PackageTags>
@@ -26,6 +27,11 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Floci.Testcontainers.Aws" />
     <InternalsVisibleTo Include="Floci.Testcontainers.Aws.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Shown as the package page on nuget.org. -->
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
   </ItemGroup>
 
 </Project>

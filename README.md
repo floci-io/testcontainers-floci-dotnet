@@ -160,7 +160,7 @@ ElastiCache (Valkey/Redis & Memcached), Lambda (real function execution), ECS, E
 (Redpanda), OpenSearch, Neptune (Gremlin), EKS (k3s), CodeBuild, Batch.
 
 STS works out of the box (always on; no config). The authoritative list of config records is the
-set of `*Config.cs` files in [`src/Floci.Testcontainers.Aws`](src/Floci.Testcontainers.Aws).
+set of `*Config.cs` files in [`src/Floci.Testcontainers.Aws`](https://github.com/floci-io/testcontainers-floci-dotnet/tree/main/src/Floci.Testcontainers.Aws).
 
 ### Container-based services
 
@@ -220,8 +220,8 @@ the floating `latest` tag; the .NET builder's baked-in default is a **pinned** t
 version in favour of always passing the image, so new code should not rely on them.
 
 The tag this repository's integration tests run against is declared in
-[`TestImages.cs`](tests/Floci.Testcontainers.Aws.IntegrationTests/TestImages.cs). The images cached
-by CI are listed in [`.github/docker-images.txt`](.github/docker-images.txt).
+[`TestImages.cs`](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/tests/Floci.Testcontainers.Aws.IntegrationTests/TestImages.cs). The images cached
+by CI are listed in [`.github/docker-images.txt`](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/.github/docker-images.txt).
 
 ## Requirements
 
@@ -236,11 +236,11 @@ dotnet test   # requires a running Docker daemon
 ```
 
 Unit tests (`*ConfigTest`, no Docker) live in
-[`tests/Floci.Testcontainers.Aws.Tests`](tests/Floci.Testcontainers.Aws.Tests) and integration tests
+[`tests/Floci.Testcontainers.Aws.Tests`](https://github.com/floci-io/testcontainers-floci-dotnet/tree/main/tests/Floci.Testcontainers.Aws.Tests) and integration tests
 (`*ServiceTest`, real Floci containers) in
-[`tests/Floci.Testcontainers.Aws.IntegrationTests`](tests/Floci.Testcontainers.Aws.IntegrationTests).
+[`tests/Floci.Testcontainers.Aws.IntegrationTests`](https://github.com/floci-io/testcontainers-floci-dotnet/tree/main/tests/Floci.Testcontainers.Aws.IntegrationTests).
 Test parallelization is disabled in the integration project on purpose: container-backed tests
-flake under Docker daemon load. See [CONTRIBUTING.md](CONTRIBUTING.md) for the project layout,
+flake under Docker daemon load. See [CONTRIBUTING.md](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/CONTRIBUTING.md) for the project layout,
 the branching model, and how to add a service.
 
 ### Running on Colima
@@ -271,11 +271,11 @@ On native Linux Docker (e.g. CI), neither variable is needed.
 
 - 💬 [Slack](https://join.slack.com/t/floci/shared_invite/zt-3tjn02s3q-A00kEjJ1cZxsg_imTfy6Cw): quick questions and community chat
 - 🗣️ [GitHub Discussions](https://github.com/orgs/floci-io/discussions): ideas, design tradeoffs, and proposals
-- [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) · [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) · [MAINTAINERS.md](MAINTAINERS.md)
+- [CONTRIBUTING.md](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/CONTRIBUTING.md) · [SECURITY.md](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/SECURITY.md) · [CODE_OF_CONDUCT.md](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/CODE_OF_CONDUCT.md) · [MAINTAINERS.md](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/MAINTAINERS.md)
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT. See [LICENSE](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/LICENSE).
 
 ---
 
