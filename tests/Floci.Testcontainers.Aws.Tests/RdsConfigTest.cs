@@ -63,12 +63,22 @@ public sealed class RdsConfigTest
         Assert.Equal("rds.example.com", env["FLOCI_SERVICES_RDS_ENDPOINT_HOST"]);
     }
 
+    [Theory]
+    [InlineData("docker.example", false, "unix:///var/run/docker.sock", "docker.example")]
+    [InlineData("docker.example", true, "unix:///var/run/docker.sock", "docker.example")]
+    [InlineData(null, true, "unix:///var/run/docker.sock", null)]
+    [InlineData(null, false, "tcp://10.0.0.5:2375", "10.0.0.5")]
+    [InlineData(null, false, "unix:///var/run/docker.sock", "127.0.0.1")]
+    public void PicksTheHostTheTestProcessReaches(string? hostOverride, bool inContainer, string endpoint, string? expected)
+    {
+        Assert.Equal(expected, FlociBuilder.DockerHost(hostOverride, inContainer, new Uri(endpoint)));
+    }
+
     [Fact]
-    public void BuilderAdvertisesTheDockerHostUnlessAnEndpointHostIsSet()
+    public void BuilderLeavesAnExplicitOrDisabledEndpointHostAlone()
     {
         const string key = "FLOCI_SERVICES_RDS_ENDPOINT_HOST";
 
-        Assert.False(string.IsNullOrEmpty(new FlociBuilder("floci/floci:latest").WithReachableRdsEndpoint().Environments[key]));
         Assert.Equal("rds.example.com", new FlociBuilder("floci/floci:latest")
             .WithRds(new RdsConfig { EndpointHost = "rds.example.com" })
             .WithReachableRdsEndpoint().Environments[key]);

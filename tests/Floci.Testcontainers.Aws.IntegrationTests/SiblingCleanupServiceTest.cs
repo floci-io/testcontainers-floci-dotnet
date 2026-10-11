@@ -15,7 +15,8 @@ public sealed class SiblingCleanupServiceTest
     [Fact]
     public async Task DisposeRemovesTheSiblingContainersFlociSpawned()
     {
-        var floci = new FlociBuilder(TestImages.Floci).WithEcr(new EcrConfig()).Build();
+        // await using: a failed assertion still disposes the emulator and its siblings.
+        await using var floci = new FlociBuilder(TestImages.Floci).WithEcr(new EcrConfig()).Build();
         await floci.StartAsync();
         var resourceNamespace = floci.ResourceNamespace!;
 

@@ -639,23 +639,34 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
             return this;
         }
 
-        var host = DockerHost();
+        var host = DockerHost(
+            TestcontainersSettings.DockerHostOverride,
+            File.Exists("/.dockerenv"),
+            DockerResourceConfiguration.DockerEndpointAuthConfig?.Endpoint);
         return host is null ? this : WithEnvironment(key, host);
     }
 
-    private string? DockerHost()
+    /// <summary>
+    /// Gets the host a test process reaches published ports on: the Testcontainers host override,
+    /// otherwise nothing inside a container (the bridge address is the reachable one there),
+    /// otherwise the host of a tcp/http Docker endpoint, otherwise <c>127.0.0.1</c>.
+    /// </summary>
+    /// <param name="hostOverride">The Testcontainers host override, if any.</param>
+    /// <param name="inContainer">Whether this process runs inside a container.</param>
+    /// <param name="endpoint">The Docker endpoint.</param>
+    /// <returns>The host, or <see langword="null" /> to leave Floci's default.</returns>
+    internal static string? DockerHost(string? hostOverride, bool inContainer, Uri? endpoint)
     {
-        if (!string.IsNullOrEmpty(TestcontainersSettings.DockerHostOverride))
+        if (!string.IsNullOrEmpty(hostOverride))
         {
-            return TestcontainersSettings.DockerHostOverride;
+            return hostOverride;
         }
 
-        if (File.Exists("/.dockerenv"))
+        if (inContainer)
         {
             return null;
         }
 
-        var endpoint = DockerResourceConfiguration.DockerEndpointAuthConfig?.Endpoint;
         return endpoint is not null && endpoint.Scheme is "tcp" or "http" or "https" ? endpoint.Host : "127.0.0.1";
     }
 
