@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using JetBrains.Annotations;
 
 namespace Floci.Testcontainers.Aws;
@@ -64,10 +63,6 @@ public sealed record EcrConfig : FlociServiceConfig
 
     /// <inheritdoc />
     internal override bool RequiresDockerAccess => true;
-
-    /// <inheritdoc />
-    internal override IReadOnlyCollection<int> FixedHostPorts =>
-        Enumerable.Range(RegistryBasePort, RegistryPortsCount).ToArray();
 
     /// <inheritdoc />
     protected override void AddSettings(IDictionary<string, string> env, string prefix)
