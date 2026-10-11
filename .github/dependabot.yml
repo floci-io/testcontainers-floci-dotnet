@@ -12,6 +12,11 @@ updates:
       - dependencies
     commit-message:
       prefix: "fix(deps)"
+    # One PR per dependency across src/*: without this, a bump shared by Floci.Testcontainers.Core and
+    # Floci.Testcontainers.Aws opened two PRs (one per project) that conflict with each other.
+    groups:
+      src:
+        group-by: dependency-name
 
   # Test-only dependencies: chores, no release.
   - package-ecosystem: nuget
