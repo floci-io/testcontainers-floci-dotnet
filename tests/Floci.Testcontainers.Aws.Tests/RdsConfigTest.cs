@@ -53,12 +53,28 @@ public sealed class RdsConfigTest
             ProxyPortsCount = 5,
             PostgresImage = "postgres:15",
             DockerNetwork = "floci-net",
+            EndpointHost = "rds.example.com",
         }.BuildEnvironment();
 
         Assert.Equal("8000", env["FLOCI_SERVICES_RDS_PROXY_BASE_PORT"]);
         Assert.Equal("8004", env["FLOCI_SERVICES_RDS_PROXY_MAX_PORT"]);
         Assert.Equal("postgres:15", env["FLOCI_SERVICES_RDS_DEFAULT_POSTGRES_IMAGE"]);
         Assert.Equal("floci-net", env["FLOCI_SERVICES_RDS_DOCKER_NETWORK"]);
+        Assert.Equal("rds.example.com", env["FLOCI_SERVICES_RDS_ENDPOINT_HOST"]);
+    }
+
+    [Fact]
+    public void BuilderAdvertisesTheDockerHostUnlessAnEndpointHostIsSet()
+    {
+        const string key = "FLOCI_SERVICES_RDS_ENDPOINT_HOST";
+
+        Assert.False(string.IsNullOrEmpty(new FlociBuilder("floci/floci:latest").WithReachableRdsEndpoint().Environments[key]));
+        Assert.Equal("rds.example.com", new FlociBuilder("floci/floci:latest")
+            .WithRds(new RdsConfig { EndpointHost = "rds.example.com" })
+            .WithReachableRdsEndpoint().Environments[key]);
+        Assert.False(new FlociBuilder("floci/floci:latest")
+            .WithRds(new RdsConfig { Enabled = false })
+            .WithReachableRdsEndpoint().Environments.ContainsKey(key));
     }
 
     [Fact]
