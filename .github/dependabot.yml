@@ -1,12 +1,29 @@
 version: 2
 updates:
+  # The packages' own dependencies: a bump reaches every consumer, so it is a fix and goes in the
+  # changelog. Titles must be Conventional Commits (the PR title is checked and becomes the commit).
   - package-ecosystem: nuget
-    directory: /
+    directories:
+      - "/src/*"
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
     labels:
       - dependencies
+    commit-message:
+      prefix: "fix(deps)"
+
+  # Test-only dependencies: chores, no release.
+  - package-ecosystem: nuget
+    directories:
+      - "/tests/*"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+    commit-message:
+      prefix: "chore(deps)"
     groups:
       # The test projects pull ~30 AWSSDK.* packages — group them into one PR to avoid noise.
       aws-sdk:
@@ -26,3 +43,5 @@ updates:
     labels:
       - dependencies
       - github-actions
+    commit-message:
+      prefix: "chore(deps)"
