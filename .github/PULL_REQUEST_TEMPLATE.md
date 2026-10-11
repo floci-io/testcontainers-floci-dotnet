@@ -18,7 +18,7 @@
 
 ## Checklist
 
-- [ ] `dotnet build Testcontainers.Floci.slnx -c Release -warnaserror` is clean (0 warnings)
+- [ ] `dotnet build Floci.Testcontainers.slnx -c Release -warnaserror` is clean (0 warnings)
 - [ ] `dotnet test` passes (unit always; integration if Docker-affecting — needs Docker)
 - [ ] New or changed behaviour is covered by tests
 - [ ] Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `chore:`, etc.)

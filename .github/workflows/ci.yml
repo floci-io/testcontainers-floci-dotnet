@@ -33,10 +33,10 @@ jobs:
           global-json-file: global.json
 
       - name: Build (warnings as errors)
-        run: dotnet build Testcontainers.Floci.slnx -c Release -warnaserror
+        run: dotnet build Floci.Testcontainers.slnx -c Release -warnaserror
 
       - name: Unit tests
-        run: dotnet test tests/Testcontainers.Floci.Tests/Testcontainers.Floci.Tests.csproj -c Release --no-build
+        run: dotnet test tests/Floci.Testcontainers.Aws.Tests/Floci.Testcontainers.Aws.Tests.csproj -c Release --no-build
 
   integration:
     runs-on: ubuntu-latest
@@ -82,4 +82,4 @@ jobs:
           key: docker-images-v1-${{ hashFiles('.github/docker-images.txt') }}
 
       - name: Integration tests
-        run: dotnet test tests/Testcontainers.Floci.IntegrationTests/Testcontainers.Floci.IntegrationTests.csproj -c Release
+        run: dotnet test tests/Floci.Testcontainers.Aws.IntegrationTests/Floci.Testcontainers.Aws.IntegrationTests.csproj -c Release

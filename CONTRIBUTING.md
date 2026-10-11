@@ -1,4 +1,4 @@
-# Contributing to Testcontainers.Floci (.NET)
+# Contributing to Floci.Testcontainers (.NET)
 
 Thanks for your interest in contributing! This explains how to build and test the module, the
 branching model, and the conventions to follow.
@@ -27,25 +27,32 @@ git remote add upstream https://github.com/floci-io/testcontainers-floci-dotnet.
 
 ```bash
 # Build all targets; the repo must stay warning-clean.
-dotnet build Testcontainers.Floci.slnx -c Release -warnaserror
+dotnet build Floci.Testcontainers.slnx -c Release -warnaserror
 
 # Unit tier — fast, no Docker.
-dotnet test tests/Testcontainers.Floci.Tests/Testcontainers.Floci.Tests.csproj -c Release
+dotnet test tests/Floci.Testcontainers.Aws.Tests/Floci.Testcontainers.Aws.Tests.csproj -c Release
 
 # Integration tier — needs Docker; starts a real Floci container per test class.
-dotnet test tests/Testcontainers.Floci.IntegrationTests/Testcontainers.Floci.IntegrationTests.csproj -c Release
+dotnet test tests/Floci.Testcontainers.Aws.IntegrationTests/Floci.Testcontainers.Aws.IntegrationTests.csproj -c Release
 ```
 
 ## Project structure
 
 ```
-src/Testcontainers.Floci/                     Core module (netstandard2.0 .. net10.0)
-  FlociConfiguration / FlociBuilder / FlociContainer   The Testcontainers triad
-  FlociServiceConfig                          Base record for per-service config
-  <Service>Config.cs                          One record per AWS service (SqsConfig is the reference)
-tests/Testcontainers.Floci.Tests/             Unit tests (*ConfigTest) — no Docker
-tests/Testcontainers.Floci.IntegrationTests/  Integration tests (*ServiceTest) — Docker required
+src/Floci.Testcontainers.Core/                    Shared core (netstandard2.0 .. net10.0)
+  CloudDescriptor / SocketService                   One emulator's facts as data (port, env prefix, health/reset paths, socket services)
+  FlociHost                                         Host Docker socket and state reset
+  FlociServiceConfig                                Base record for per-service config
+src/Floci.Testcontainers.Aws/                     AWS module, built on the core
+  AwsCloud                                          The AWS descriptor
+  FlociConfiguration / FlociBuilder / FlociContainer  The Testcontainers triad
+  <Service>Config.cs                                One record per AWS service (SqsConfig is the reference)
+tests/Floci.Testcontainers.Aws.Tests/             Unit tests (*ConfigTest, CoreTest) — no Docker
+tests/Floci.Testcontainers.Aws.IntegrationTests/  Integration tests (*ServiceTest) — Docker required
 ```
+
+Azure, GCP and OCI will arrive as sibling packages (`Floci.Testcontainers.Az`, `.Gcp`, `.Oci`) on the
+same core.
 
 ## Branching model
 
@@ -58,17 +65,18 @@ This is the bulk of the work and follows a fixed template. See the open
 issues (tracked under the [service-parity issue](https://github.com/floci-io/testcontainers-floci-dotnet/issues/6)).
 For each service:
 
-1. **Config record** — `src/Testcontainers.Floci/<Service>Config.cs`, a `sealed record : FlociServiceConfig`
+1. **Config record** — `src/Floci.Testcontainers.Aws/<Service>Config.cs`, a `sealed record : FlociServiceConfig`
    with one `init` property per setting (same defaults as the Floci/Java reference), `ServiceKey => "<TOKEN>"`,
    and `AddSettings` writing each setting with the exact `FLOCI_SERVICES_<TOKEN>_<SETTING>` env key.
 2. **Builder method** — `FlociBuilder.With<Service>(<Service>Config config) => WithServiceConfig(config);`.
-3. **Unit test** — `tests/Testcontainers.Floci.Tests/<Service>ConfigTest.cs`: defaults, default env output,
+3. **Unit test** — `tests/Floci.Testcontainers.Aws.Tests/<Service>ConfigTest.cs`: defaults, default env output,
    custom env output, disabled-only.
-4. **Integration test** — `tests/Testcontainers.Floci.IntegrationTests/<Service>ServiceTest.cs`: an
+4. **Integration test** — `tests/Floci.Testcontainers.Aws.IntegrationTests/<Service>ServiceTest.cs`: an
    `IAsyncLifetime` that starts a `FlociBuilder().Build()` and does a real round-trip via the AWS SDK client
    pointed at `GetEndpoint()`. Add the `AWSSDK.<Service>` package to the integration project.
 5. Container-based services (those that make Floci spawn sibling containers) additionally override
-   `RequiresDockerAccess` / `FixedHostPorts` and should delete the resource in teardown.
+   `RequiresDockerAccess` / `FixedHostPorts`, are added to the `SocketServices` of `AwsCloud.Descriptor`
+   (`CoreTest` fails when the two disagree), and should delete the resource in teardown.
 
 ## Developer Certificate of Origin (DCO) sign-off
 

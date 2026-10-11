@@ -1,4 +1,4 @@
-# CLAUDE.md — Testcontainers.Floci (.NET)
+# CLAUDE.md — Floci.Testcontainers (.NET)
 
 A Testcontainers for .NET module for [Floci](https://github.com/floci-io/floci), a free local
 AWS emulator. Built to replace LocalStack in CI after LocalStack's Community edition closed.
@@ -6,11 +6,20 @@ Intended to be contributed upstream to the `floci-io` org.
 
 ## Layout
 
-- `src/Testcontainers.Floci/` — the module (netstandard2.0 library)
-  - `FlociConfiguration` / `FlociBuilder` / `FlociContainer` — the Testcontainers triad (core)
+- `src/Floci.Testcontainers.Core/` — the cloud-independent core (package `Floci.Testcontainers.Core`)
+  - `CloudDescriptor` / `SocketService` — one emulator's facts as data (port, env prefix, health and
+    reset paths, the services that need the Docker socket)
+  - `FlociHost` — host Docker socket path and state reset
   - `FlociServiceConfig` — base record for per-service config
+- `src/Floci.Testcontainers.Aws/` — the AWS module (package `Floci.Testcontainers.Aws`)
+  - `AwsCloud.Descriptor` — the AWS descriptor
+  - `FlociConfiguration` / `FlociBuilder` / `FlociContainer` — the Testcontainers triad
   - `SqsConfig` — the **reference implementation** of the per-service template
-- `tests/Testcontainers.Floci.Tests/` — xUnit tests (net10.0)
+- `tests/Floci.Testcontainers.Aws.Tests/` — xUnit unit tests (net10.0), incl. `CoreTest`
+- `tests/Floci.Testcontainers.Aws.IntegrationTests/` — Docker-backed `*ServiceTest`
+- Azure, GCP and OCI will be sibling packages (`Floci.Testcontainers.Az`, `.Gcp`, `.Oci`) on the same core.
+  The old id `Testcontainers.Floci` belongs to the official testcontainers-dotnet module on nuget.org,
+  hence the `Floci.` prefix.
 - Local read-only reference (not in this repo): the upstream Java module at
   `~/repos/testcontainers-floci`. Port from it (read `XxxConfig.java` + its tests per service).
 
@@ -43,7 +52,7 @@ On native Linux Docker (e.g. CI) neither var is needed; the defaults are correct
 This is the pattern. Replicating it across services is the bulk of the work and is suited to
 Sonnet. For each AWS service, read the Java `XxxConfig.java` + its two tests, then:
 
-1. **Config record** — `src/Testcontainers.Floci/XxxConfig.cs`, a `sealed record : FlociServiceConfig`:
+1. **Config record** — `src/Floci.Testcontainers.Aws/XxxConfig.cs`, a `sealed record : FlociServiceConfig`:
    - One `init` property per setting, with the **same defaults as the Java class**.
    - `ServiceKey => "XXX"` (the SCREAMING_SNAKE token in the env prefix).
    - `AddSettings` writes each setting using the **exact Java env-var key** (the part after
@@ -78,7 +87,7 @@ once `dotnet test` is green.
   `TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock` and Ryuk works. Do not add any
   Colima-specific code (e.g. a ModuleInitializer that disables Ryuk) — keep the module portable.
 - **`IsExternalInit`**: required for `init` setters on netstandard2.0. We ship our own polyfill
-  (`src/Testcontainers.Floci/IsExternalInit.cs`) so the modreq doesn't bind to a transitive
+  (`IsExternalInit.cs` in both `src` projects) so the modreq doesn't bind to a transitive
   assembly (which breaks net consumers). Keep it.
 - **Lambda** (done, container-based): runs each function's real AWS Lambda runtime container,
   pulled from `public.ecr.aws/lambda/*` on first invoke (python3.12 ≈ 778 MB, cached after). Real
@@ -91,8 +100,9 @@ once `dotnet test` is green.
   host path into the function container — on Colima it must be a VM-visible path, not a macOS one.
 - **Container-based services** (RDS, Lambda, ElastiCache, ECS, EC2, ECR — all done): Floci spawns
   sibling containers via the Docker daemon. A config opts in by overriding `RequiresDockerAccess`
-  (mounts `/var/run/docker.sock`) and `FixedHostPorts` (publishes ports **1:1**, since Floci
-  returns `endpoint=localhost:<port>` literally). `FlociBuilder.WithServiceConfig` honours both.
+  **and** being listed in `AwsCloud.Descriptor.SocketServices` (`CoreTest` keeps the two in step;
+  `Build()` mounts `/var/run/docker.sock` from the final env, so it is on by default) and `FixedHostPorts` (publishes ports **1:1**, since Floci
+  returns `endpoint=localhost:<port>` literally). `WithServiceConfig` publishes the ports; `Build()` mounts the socket.
   ECS and EC2 also support a `Mock` mode (`RequiresDockerAccess => !Mock`) that returns RUNNING
   without spawning containers — used by their tests for determinism. Hard-won gotchas:
   - **macOS port 7000 collision**: Control Center / AirPlay Receiver listens on `*:7000`, so the

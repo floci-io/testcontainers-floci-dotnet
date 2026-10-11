@@ -22,9 +22,9 @@ labels: new-service
 
 Follows the per-service template in `CLAUDE.md`.
 
-- [ ] `src/Testcontainers.Floci/XxxConfig.cs` — `sealed record : FlociServiceConfig`; one `init` property per setting with the **same defaults as the Java class**; `ServiceKey => "TOKEN"`; `AddSettings` writes each setting with the **exact Java env-var key** (invariant culture for numbers, `"true"`/`"false"` for bools)
+- [ ] `src/Floci.Testcontainers.Aws/XxxConfig.cs` — `sealed record : FlociServiceConfig`; one `init` property per setting with the **same defaults as the Java class**; `ServiceKey => "TOKEN"`; `AddSettings` writes each setting with the **exact Java env-var key** (invariant culture for numbers, `"true"`/`"false"` for bools)
 - [ ] `FlociBuilder.WithXxx(XxxConfig config) => WithServiceConfig(config);`
-- [ ] `tests/Testcontainers.Floci.Tests/XxxConfigTest.cs` (unit) — defaults, default env output, custom env output, disabled-only
-- [ ] `tests/Testcontainers.Floci.IntegrationTests/XxxServiceTest.cs` (integration) — `IAsyncLifetime` + a real round-trip; add `AWSSDK.Xxx` to the integration project
+- [ ] `tests/Floci.Testcontainers.Aws.Tests/XxxConfigTest.cs` (unit) — defaults, default env output, custom env output, disabled-only
+- [ ] `tests/Floci.Testcontainers.Aws.IntegrationTests/XxxServiceTest.cs` (integration) — `IAsyncLifetime` + a real round-trip; add `AWSSDK.Xxx` to the integration project
 - [ ] Container-based only: override `RequiresDockerAccess` / `FixedHostPorts`; delete the resource in teardown so Floci removes the sibling
-- [ ] `dotnet build Testcontainers.Floci.slnx -c Release -warnaserror` clean and `dotnet test` green
+- [ ] `dotnet build Floci.Testcontainers.slnx -c Release -warnaserror` clean and `dotnet test` green

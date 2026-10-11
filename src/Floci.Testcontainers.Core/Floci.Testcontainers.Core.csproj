@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0;net10.0;netstandard2.0;netstandard2.1</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Package">
+    <PackageId>Floci.Testcontainers.Core</PackageId>
+    <Authors>Floci and its contributors</Authors>
+    <Description>Shared core of the Floci Testcontainers modules for .NET: the cloud descriptor, Docker socket detection and the per-service config base. Use a cloud package such as Floci.Testcontainers.Aws.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/floci-io/testcontainers-floci-dotnet</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/floci-io/testcontainers-floci-dotnet</RepositoryUrl>
+    <PackageTags>testcontainers;floci;emulator;testing;docker</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
+    <PackageReference Include="Testcontainers" Version="4.15.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Floci.Testcontainers.Aws" />
+    <InternalsVisibleTo Include="Floci.Testcontainers.Aws.Tests" />
+  </ItemGroup>
+
+</Project>
