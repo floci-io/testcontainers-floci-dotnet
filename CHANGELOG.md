@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.1](https://github.com/floci-io/testcontainers-floci-dotnet/compare/v1.0.0...v1.0.1) (2026-10-11)
+
+
+### Bug Fixes
+
+* **deps:** Bump Testcontainers in /src/Floci.Testcontainers.Aws ([#130](https://github.com/floci-io/testcontainers-floci-dotnet/issues/130)) ([0f17b18](https://github.com/floci-io/testcontainers-floci-dotnet/commit/0f17b189507d8d9450d227f2efb51fd6fa7d9466))
+* include the README in the NuGet packages ([#132](https://github.com/floci-io/testcontainers-floci-dotnet/issues/132)) ([9c09498](https://github.com/floci-io/testcontainers-floci-dotnet/commit/9c094983fa39060184e33aeb6b74ff97b65bb684))
+
 ## [1.0.0](https://github.com/floci-io/testcontainers-floci-dotnet/compare/v0.16.5...v1.0.0) (2026-10-11)
 
 
