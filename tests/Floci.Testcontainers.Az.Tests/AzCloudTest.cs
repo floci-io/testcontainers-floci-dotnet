@@ -245,6 +245,40 @@ public sealed class AzCloudTest
         Assert.Equal(expected, FlociAzContainer.IpHost(host));
     }
 
+    [Theory]
+    [InlineData("v4-and-v6.test", "10.1.2.3")]
+    [InlineData("v6-only.test", "[fd00::7]")]
+    [InlineData("no-address.test", "no-address.test")]
+    [InlineData("unknown.test", "unknown.test")]
+    public void StorageEndpointsPreferIpv4AndFallBackToBracketedIpv6(string host, string expected)
+    {
+        System.Net.IPAddress[] Resolve(string name) => name switch
+        {
+            "v4-and-v6.test" => new[] { System.Net.IPAddress.Parse("fd00::7"), System.Net.IPAddress.Parse("10.1.2.3") },
+            "v6-only.test" => new[] { System.Net.IPAddress.Parse("fd00::7") },
+            "no-address.test" => Array.Empty<System.Net.IPAddress>(),
+            _ => throw new System.Net.Sockets.SocketException(),
+        };
+
+        Assert.Equal(expected, FlociAzContainer.IpHost(host, Resolve));
+    }
+
+    [Theory]
+    [InlineData("::1", "http://[::1]:32781")]
+    [InlineData("fd00::7", "http://[fd00::7]:32781")]
+    [InlineData("[::1]", "http://[::1]:32781")]
+    [InlineData("127.0.0.1", "http://127.0.0.1:32781")]
+    [InlineData("localhost", "http://localhost:32781")]
+    [InlineData("docker.internal", "http://docker.internal:32781")]
+    public void EndpointUrlsBracketAnIpv6Host(string host, string expected)
+    {
+        Assert.Equal(expected, FlociHost.BaseUrl("http", host, 32781));
+        Assert.Equal(expected.Replace("http://", "https://"), FlociHost.BaseUrl("https", host, 32781));
+        Assert.Equal(expected.Substring("http://".Length), FlociHost.HostAndPort(host, 32781));
+        Assert.True(Uri.TryCreate(expected + "/_floci/health", UriKind.Absolute, out var uri));
+        Assert.Equal(32781, uri!.Port);
+    }
+
     internal static IReadOnlyList<FlociServiceConfig> AllConfigs() => typeof(FlociAzBuilder).Assembly.GetTypes()
         .Where(type => typeof(FlociServiceConfig).IsAssignableFrom(type) && !type.IsAbstract)
         .Select(type => (FlociServiceConfig)Activator.CreateInstance(type)!)

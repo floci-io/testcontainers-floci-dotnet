@@ -1,5 +1,4 @@
 using System;
-using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -172,22 +171,29 @@ public sealed class FlociAzContainer : DockerContainer
     private string BaseUrl(string scheme) => BaseUrl(scheme, Hostname);
 
     private string BaseUrl(string scheme, string host) =>
-        scheme + "://" + host + ":" + GetMappedPublicPort(FlociAzBuilder.FlociAzPort).ToString(CultureInfo.InvariantCulture);
+        FlociHost.BaseUrl(scheme, host, GetMappedPublicPort(FlociAzBuilder.FlociAzPort));
 
     private string StorageBaseUrl() => BaseUrl(Uri.UriSchemeHttp, IpHost(Hostname));
 
     /// <summary>
-    /// Returns <paramref name="host" /> as an IPv4 address, in the form a URL takes: itself when it
-    /// is an IP address already, the loopback address for <c>localhost</c>, otherwise what it
-    /// resolves to. A host that does not resolve is returned unchanged.
+    /// Returns <paramref name="host" /> as an IP address, in the form a URL takes: itself when it
+    /// is an IP address already (an IPv6 one in brackets), the loopback address for
+    /// <c>localhost</c>, otherwise what it resolves to, preferring IPv4 and falling back to a
+    /// bracketed IPv6 address. A host that does not resolve is returned unchanged.
     /// </summary>
     /// <param name="host">A host name or IP address.</param>
     /// <returns>The host to put in a storage endpoint.</returns>
-    internal static string IpHost(string host)
+    internal static string IpHost(string host) => IpHost(host, Dns.GetHostAddresses);
+
+    /// <summary><see cref="IpHost(string)" /> with the name resolution to use.</summary>
+    /// <param name="host">A host name or IP address.</param>
+    /// <param name="resolve">Resolves a host name to its addresses; may throw <see cref="SocketException" />.</param>
+    /// <returns>The host to put in a storage endpoint.</returns>
+    internal static string IpHost(string host, Func<string, IPAddress[]> resolve)
     {
-        if (IPAddress.TryParse(host, out var address))
+        if (IPAddress.TryParse(host, out _))
         {
-            return address.AddressFamily == AddressFamily.InterNetworkV6 ? "[" + address + "]" : host;
+            return FlociHost.UrlHost(host);
         }
 
         if (string.Equals(host, "localhost", StringComparison.OrdinalIgnoreCase))
@@ -197,8 +203,10 @@ public sealed class FlociAzContainer : DockerContainer
 
         try
         {
-            var resolved = Dns.GetHostAddresses(host).FirstOrDefault(candidate => candidate.AddressFamily == AddressFamily.InterNetwork);
-            return resolved?.ToString() ?? host;
+            var addresses = resolve(host);
+            var resolved = addresses.FirstOrDefault(candidate => candidate.AddressFamily == AddressFamily.InterNetwork)
+                ?? addresses.FirstOrDefault(candidate => candidate.AddressFamily == AddressFamily.InterNetworkV6);
+            return resolved is null ? host : FlociHost.UrlHost(resolved.ToString());
         }
         catch (SocketException)
         {
