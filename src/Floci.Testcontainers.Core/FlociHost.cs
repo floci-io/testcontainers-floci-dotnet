@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Net;
 using System.Net.Http;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Docker.DotNet;
@@ -38,6 +41,46 @@ public static class FlociHost
     {
         var socketPath = Environment.GetEnvironmentVariable("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE");
         return string.IsNullOrEmpty(socketPath) ? ContainerDockerSocket : socketPath!;
+    }
+
+    /// <summary>
+    /// Returns <paramref name="host" /> in the form a URL authority takes: an IPv6 literal in
+    /// square brackets (<c>::1</c> becomes <c>[::1]</c>), anything else unchanged.
+    /// </summary>
+    /// <param name="host">A host name or IP address, as Testcontainers reports it.</param>
+    /// <returns>The host to put in a URL.</returns>
+    public static string UrlHost(string host)
+    {
+        return host.IndexOf(':') >= 0
+            && !host.StartsWith("[", StringComparison.Ordinal)
+            && IPAddress.TryParse(host, out var address)
+            && address.AddressFamily == AddressFamily.InterNetworkV6
+                ? "[" + host + "]"
+                : host;
+    }
+
+    /// <summary>
+    /// Builds an emulator base URL, <c>scheme://host:port</c> with no trailing slash, bracketing
+    /// an IPv6 host.
+    /// </summary>
+    /// <param name="scheme">The URL scheme, <c>http</c> or <c>https</c>.</param>
+    /// <param name="host">A host name or IP address.</param>
+    /// <param name="port">The port.</param>
+    /// <returns>The base URL, e.g. <c>http://localhost:32781</c> or <c>http://[::1]:32781</c>.</returns>
+    public static string BaseUrl(string scheme, string host, int port)
+    {
+        return scheme + "://" + HostAndPort(host, port);
+    }
+
+    /// <summary>
+    /// Builds an emulator address without a scheme, <c>host:port</c>, bracketing an IPv6 host.
+    /// </summary>
+    /// <param name="host">A host name or IP address.</param>
+    /// <param name="port">The port.</param>
+    /// <returns>The address, e.g. <c>localhost:32781</c> or <c>[::1]:32781</c>.</returns>
+    public static string HostAndPort(string host, int port)
+    {
+        return UrlHost(host) + ":" + port.ToString(CultureInfo.InvariantCulture);
     }
 
     /// <summary>

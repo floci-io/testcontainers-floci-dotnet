@@ -17,7 +17,9 @@ Intended to be contributed upstream to the `floci-io` org.
   - `SqsConfig` — the **reference implementation** of the per-service template
 - `tests/Floci.Testcontainers.Aws.Tests/` — xUnit unit tests (net10.0), incl. `CoreTest`
 - `tests/Floci.Testcontainers.Aws.IntegrationTests/` — Docker-backed `*ServiceTest`
-- Azure, GCP and OCI will be sibling packages (`Floci.Testcontainers.Az`, `.Gcp`, `.Oci`) on the same core.
+- `src/Floci.Testcontainers.Az/` — the Azure module (package `Floci.Testcontainers.Az`), see "Azure" below
+- `tests/Floci.Testcontainers.Az.Tests/` and `tests/Floci.Testcontainers.Az.IntegrationTests/` — its tests
+- GCP and OCI will be sibling packages (`Floci.Testcontainers.Gcp`, `.Oci`) on the same core.
   The old id `Testcontainers.Floci` belongs to the official testcontainers-dotnet module on nuget.org,
   hence the `Floci.` prefix.
 - Local read-only reference (not in this repo): the upstream Java module at
@@ -69,6 +71,44 @@ Sonnet. For each AWS service, read the Java `XxxConfig.java` + its two tests, th
 
 Keep each integration test small (1–2 round-trips). Commit per service (or per small batch)
 once `dotnet test` is green.
+
+## Azure (`Floci.Testcontainers.Az`)
+
+Starts `floci/floci-az` (port 4577, prefix `FLOCI_AZ_`, health `/_floci/health`, reset
+`POST /_admin/reset`). Same triad with an `Az` infix (`FlociAzConfiguration` / `FlociAzBuilder` /
+`FlociAzContainer`) so a test project can reference both clouds; `AzCloud` holds the descriptor and
+the identity defaults. The Java reference is `testcontainers-floci/testcontainers-floci-az`; the
+service list and tokens come from `ServicesConfig` in `floci-az`'s `EmulatorConfig.java`.
+
+- **Scope is the cloud MVP**: every service has a record with `Enabled`, and `Mocked` where the
+  emulator has a mock switch (`AzMockableServiceConfig`; the key is `…_MOCKED`, not AWS's `…_MOCK`,
+  and the default is per service: ACI, Container Apps, Service Bus and VM are mocked by default).
+  Typed settings beyond that are ported from Java service by service. The only ones present are those
+  socket detection needs: `CosmosConfig` (engine startup and the four Docker-backed API engines) and
+  `SqlConfig` (data-plane provider, EULA).
+- **Socket table**: `AzCloud.Descriptor.SocketServices`, using the core's `MockSetting`,
+  `MockedByDefault` and `Condition`. `AzCloudTest` keeps it in step with the configs.
+- **No baked-in image**: `FlociAzBuilder` only has constructors that take the image.
+- **Always set, overridable**: `FLOCI_AZ_DOCKER_ENDPOINT_MODE=published`, `FLOCI_AZ_TLS_HTTPS_PORT=0`.
+- **`GetEndpoint()` has no trailing slash** (unlike the AWS container's), because the storage
+  endpoints and the connection string are built from it exactly as in Java.
+- **Storage endpoints use an IP host** (`localhost` becomes `127.0.0.1`, other names are resolved):
+  the Azure Storage SDK for .NET treats the first path segment as the account only for an IP host;
+  with `localhost` it drops the container or queue name. `GetEndpoint()` keeps the host name.
+- **TLS readiness**: with TLS enabled the emulator's port-sniffing proxy accepts connections, and
+  plain HTTP is healthy, about 200-330 ms before the HTTPS backend listens (its log shows `TLS proxy:
+  failed to connect to backend port 4571: Connection refused`); a handshake in that window ends in an
+  EOF, whatever the ALPN. So `Build()` adds an HTTPS wait on the health path when
+  `FLOCI_AZ_TLS_ENABLED=true` is in the final environment (`WithTlsReadiness`, backed by the core's
+  `FlociReadiness.WithHttpsWhenTlsEnabled`; the probe does not validate the certificate). It is added
+  to the configured wait strategies, so a caller's `WithWaitStrategy` is kept. Tests must not retry
+  around it.
+- **Deliberate divergences from Java**: `AppConfigurationConfig` / `WithAppConfiguration` (Java:
+  `AppConfigConfig`), since `Floci.Testcontainers.Aws` already has an `AppConfigConfig` and both
+  namespaces are meant to be imported together; and `PolicyConfig` (`FLOCI_AZ_SERVICES_POLICY_ENABLED`),
+  which the emulator has and Java does not yet.
+- Image: tests use `TestImages.FlociAz` (`floci/floci-az:0.14.0`); keep it in sync with
+  `.github/docker-images.txt`.
 
 ## Conventions & decisions (do not relitigate)
 

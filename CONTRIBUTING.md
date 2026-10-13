@@ -31,9 +31,11 @@ dotnet build Floci.Testcontainers.slnx -c Release -warnaserror
 
 # Unit tier — fast, no Docker.
 dotnet test tests/Floci.Testcontainers.Aws.Tests/Floci.Testcontainers.Aws.Tests.csproj -c Release
+dotnet test tests/Floci.Testcontainers.Az.Tests/Floci.Testcontainers.Az.Tests.csproj -c Release
 
 # Integration tier — needs Docker; starts a real Floci container per test class.
 dotnet test tests/Floci.Testcontainers.Aws.IntegrationTests/Floci.Testcontainers.Aws.IntegrationTests.csproj -c Release
+dotnet test tests/Floci.Testcontainers.Az.IntegrationTests/Floci.Testcontainers.Az.IntegrationTests.csproj -c Release
 ```
 
 ## Project structure
@@ -49,10 +51,16 @@ src/Floci.Testcontainers.Aws/                     AWS module, built on the core
   <Service>Config.cs                                One record per AWS service (SqsConfig is the reference)
 tests/Floci.Testcontainers.Aws.Tests/             Unit tests (*ConfigTest, CoreTest) — no Docker
 tests/Floci.Testcontainers.Aws.IntegrationTests/  Integration tests (*ServiceTest) — Docker required
+src/Floci.Testcontainers.Az/                      Azure module, built on the core
+  AzCloud                                           The Azure descriptor and identity defaults
+  FlociAzConfiguration / FlociAzBuilder / FlociAzContainer  The Testcontainers triad
+  AzServiceConfig / AzMockableServiceConfig         Bases: the enabled switch, plus the mock switch
+  <Service>Config.cs                                One record per Azure service
+tests/Floci.Testcontainers.Az.Tests/              Unit tests (AzCloudTest, ServiceConfigTest, *ConfigTest) — no Docker
+tests/Floci.Testcontainers.Az.IntegrationTests/   Integration tests (*ServiceTest) — Docker required
 ```
 
-Azure, GCP and OCI will arrive as sibling packages (`Floci.Testcontainers.Az`, `.Gcp`, `.Oci`) on the
-same core.
+GCP and OCI will arrive as sibling packages (`Floci.Testcontainers.Gcp`, `.Oci`) on the same core.
 
 ## Branching model
 

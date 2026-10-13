@@ -27,6 +27,8 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Floci.Testcontainers.Aws" />
     <InternalsVisibleTo Include="Floci.Testcontainers.Aws.Tests" />
+    <InternalsVisibleTo Include="Floci.Testcontainers.Az" />
+    <InternalsVisibleTo Include="Floci.Testcontainers.Az.Tests" />
   </ItemGroup>
 
   <ItemGroup>
