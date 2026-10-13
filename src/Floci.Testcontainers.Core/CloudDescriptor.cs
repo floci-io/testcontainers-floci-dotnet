@@ -45,8 +45,8 @@ public sealed record SocketService(string Token, bool Mockable = false, string? 
 
 /// <summary>
 /// The facts that tell one Floci emulator apart from another, as data. A cloud package
-/// (<c>Floci.Testcontainers.Aws</c>, <c>Floci.Testcontainers.Az</c>; GCP and OCI later) is this descriptor plus its
-/// own service configs and connection helpers.
+/// (<c>Floci.Testcontainers.Aws</c>, <c>Floci.Testcontainers.Az</c>, <c>Floci.Testcontainers.Gcp</c>; OCI later)
+/// is this descriptor plus its own service configs and connection helpers.
 /// </summary>
 /// <param name="Name">Short cloud name, e.g. <c>aws</c>.</param>
 /// <param name="Port">The emulator's single edge port.</param>

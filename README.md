@@ -28,7 +28,8 @@
 
 A [Testcontainers for .NET](https://dotnet.testcontainers.org/) module for
 [Floci](https://github.com/floci-io/floci), the free, open-source local AWS emulator, and for
-[Floci Azure](https://github.com/floci-io/floci-az), its Azure counterpart (see [Azure](#azure)).
+[Floci Azure](https://github.com/floci-io/floci-az) and [Floci GCP](https://github.com/floci-io/floci-gcp),
+its Azure and Google Cloud counterparts (see [Azure](#azure) and [GCP](#gcp)).
 
 It runs the `floci/floci` container for your integration tests, gives you an endpoint to point
 the AWS SDK for .NET at, and adds a **typed, per-service configuration API** over Floci's
@@ -54,7 +55,7 @@ popcorn.
 |----------------------------------------------------|-------|:----:|:-----------------------------------------------:|
 | [floci](https://github.com/floci-io/floci)         | AWS   | 4566 | ✅ [`Floci.Testcontainers.Aws`](#installation)   |
 | [floci-az](https://github.com/floci-io/floci-az)   | Azure | 4577 | ✅ [`Floci.Testcontainers.Az`](#azure)           |
-| [floci-gcp](https://github.com/floci-io/floci-gcp) | GCP   | 4588 | Planned                                         |
+| [floci-gcp](https://github.com/floci-io/floci-gcp) | GCP   | 4588 | ✅ [`Floci.Testcontainers.Gcp`](#gcp)            |
 | [floci-oci](https://github.com/floci-io/floci-oci) | OCI   | 4599 | Planned                                         |
 
 ## Installation
@@ -66,8 +67,9 @@ dotnet add package Floci.Testcontainers.Aws
 `Floci.Testcontainers.Aws` brings in `Floci.Testcontainers.Core`, the shared part every Floci cloud
 package builds on. Code lives in the `Floci.Testcontainers.Aws` namespace.
 
-For Azure, add `Floci.Testcontainers.Az` (namespace `Floci.Testcontainers.Az`). Its types carry an
-`Az` infix (`FlociAzBuilder`, `FlociAzContainer`), so one test project can reference both clouds.
+For Azure, add `Floci.Testcontainers.Az` (namespace `Floci.Testcontainers.Az`); for Google Cloud,
+`Floci.Testcontainers.Gcp` (namespace `Floci.Testcontainers.Gcp`). Their types carry an `Az` or `Gcp`
+infix (`FlociAzBuilder`, `FlociGcpContainer`), so one test project can reference several clouds.
 
 The packages are published to [nuget.org](https://www.nuget.org/packages/Floci.Testcontainers.Aws), so no
 feed or token setup is needed.
@@ -183,6 +185,73 @@ The builder always sets `FLOCI_AZ_DOCKER_ENDPOINT_MODE=published` (so the addres
 reports for its sibling containers are reachable from the test) and `FLOCI_AZ_TLS_HTTPS_PORT=0`;
 `WithEnvironment` overrides either. Readiness polls `/_floci/health` on port 4577.
 
+### GCP
+
+`FlociGcpBuilder` starts [Floci GCP](https://github.com/floci-io/floci-gcp) (`floci/floci-gcp`) and
+`FlociGcpContainer` gives the Google Cloud client libraries what they need to connect:
+
+```csharp
+await using var floci = new FlociGcpBuilder("floci/floci-gcp:latest").Build();
+await floci.StartAsync();
+
+var storage = await new StorageClientBuilder
+{
+    BaseUri = floci.GetEndpoint() + "/storage/v1/",
+    UnauthenticatedAccess = true,
+}.BuildAsync();
+await storage.CreateBucketAsync(floci.ProjectId, "orders");
+```
+
+The libraries can also find the emulator on their own, through the `*_EMULATOR_HOST` variables.
+`GetEmulatorEnv()` returns them for this container, to set on the process under test:
+
+```csharp
+foreach (var variable in floci.GetEmulatorEnv())
+{
+    Environment.SetEnvironmentVariable(variable.Key, variable.Value);
+}
+
+var publisher = await new PublisherServiceApiClientBuilder
+{
+    EmulatorDetection = EmulatorDetection.EmulatorOnly,
+}.BuildAsync();
+```
+
+| Member                     | Description                                                              | Default        |
+|----------------------------|--------------------------------------------------------------------------|----------------|
+| `GetEndpoint()`            | HTTP base URL of every service (e.g. `http://localhost:32781`)           | —              |
+| `GetHostAndPort()`         | The same address without a scheme, as gRPC clients take it               | —              |
+| `ProjectId`                | Default project; any project id is accepted                              | `floci-local`  |
+| `GetEmulatorEnv()`         | `PUBSUB_`, `FIRESTORE_`, `DATASTORE_`, `SECRET_MANAGER_`, `FIREBASE_AUTH_`, `LOGGING_` and `KMS_EMULATOR_HOST`, `STORAGE_EMULATOR_HOST`, `STORAGE_EMULATOR_HOST_GRPC`, `GOOGLE_CLOUD_PROJECT` | — |
+| `GetHttpsEndpoint()`       | HTTPS base URL, served on the same port once `WithTls()` is set          | —              |
+| `GetTlsCertificateAsync()` | PEM certificate HTTPS clients have to trust (needs `WithTls()`)          | —              |
+| `ResourceNamespace`        | Prefix of the sibling containers' names                                  | `tc-` + 8 hex  |
+| `ResetAsync()`             | Wipes all emulator state without restarting                              | —              |
+
+Every `*_EMULATOR_HOST` value is `host:port`, except `STORAGE_EMULATOR_HOST`, which the Cloud Storage
+libraries expect as a URL. `LOGGING_EMULATOR_HOST` and `KMS_EMULATOR_HOST` are a floci-gcp convention
+that no Google client library reads; they are there for your own code to read the endpoint from.
+gRPC is served in plain text on the same port as REST. Services without
+such a variable (BigQuery, Cloud Tasks, Cloud Monitoring and others) take `GetEndpoint()` as an
+explicit endpoint.
+
+Every Google Cloud service has a config record with an `Enabled` switch, applied with `WithXxx(...)`
+(`WithPubSub(new PubSubConfig { Enabled = false })`). BigQuery, Cloud Run, Cloud SQL, GKE and Kafka run
+real sibling containers and also have a `Mock` switch that turns that off
+(`WithGke(new GkeConfig { Mock = true })`). Other settings go through
+`WithEnvironment("FLOCI_GCP_SERVICES_…", …)` for now. Three records carry a `Gcp` prefix because the
+AWS package has a type of the same name: `GcpIamConfig`, `GcpKmsConfig` and `GcpSchedulerConfig`
+(their methods are `WithIam`, `WithKms` and `WithScheduler`). The authoritative list of config records
+is the set of `*Config.cs` files in
+[`src/Floci.Testcontainers.Gcp`](https://github.com/floci-io/testcontainers-floci-dotnet/tree/main/src/Floci.Testcontainers.Gcp).
+
+The Docker socket, the resource namespace and sibling cleanup work as described under
+[Container-based services](#container-based-services). Other builder options: `WithProjectId(id)`,
+`WithTls()`, `WithLogLevel(level)`, `WithResourceNamespace`, `WithDockerSocket(path)` and
+`WithoutDockerSocket()`. The builder always sets `FLOCI_GCP_TLS_HTTPS_PORT=0`; `WithEnvironment`
+overrides it. Readiness polls `/_floci-gcp/health` on port 4588, over HTTPS as well once `WithTls()` is
+set, so HTTPS clients can connect as soon as `StartAsync` returns.
+
 ## Service configuration
 
 | Method                              | Description                                                         |
@@ -276,11 +345,13 @@ the floating `latest` tag; the .NET builder's baked-in default is a **pinned** t
 (a specific `x.y.z` release), exposed through the parameterless `FlociBuilder()` constructor and the
 `FlociBuilder.FlociImage` constant. Both are marked `[Obsolete]` and will be removed in a future
 version in favour of always passing the image, so new code should not rely on them.
-`FlociAzBuilder` has no default image at all: pass it, e.g. `new FlociAzBuilder("floci/floci-az:latest")`.
+`FlociAzBuilder` and `FlociGcpBuilder` have no default image at all: pass it, e.g.
+`new FlociAzBuilder("floci/floci-az:latest")` or `new FlociGcpBuilder("floci/floci-gcp:latest")`.
 
 The tag this repository's integration tests run against is declared in
 [`TestImages.cs`](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/tests/Floci.Testcontainers.Aws.IntegrationTests/TestImages.cs)
-(Azure: [`TestImages.cs`](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/tests/Floci.Testcontainers.Az.IntegrationTests/TestImages.cs)). The images cached
+(Azure: [`TestImages.cs`](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/tests/Floci.Testcontainers.Az.IntegrationTests/TestImages.cs),
+GCP: [`TestImages.cs`](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/tests/Floci.Testcontainers.Gcp.IntegrationTests/TestImages.cs)). The images cached
 by CI are listed in [`.github/docker-images.txt`](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/.github/docker-images.txt).
 
 ## Requirements
@@ -299,7 +370,7 @@ Unit tests (`*ConfigTest`, no Docker) live in
 [`tests/Floci.Testcontainers.Aws.Tests`](https://github.com/floci-io/testcontainers-floci-dotnet/tree/main/tests/Floci.Testcontainers.Aws.Tests) and integration tests
 (`*ServiceTest`, real Floci containers) in
 [`tests/Floci.Testcontainers.Aws.IntegrationTests`](https://github.com/floci-io/testcontainers-floci-dotnet/tree/main/tests/Floci.Testcontainers.Aws.IntegrationTests);
-the Azure ones are in `tests/Floci.Testcontainers.Az.Tests` and `tests/Floci.Testcontainers.Az.IntegrationTests`.
+the Azure and GCP ones are in the `tests/Floci.Testcontainers.Az.*` and `tests/Floci.Testcontainers.Gcp.*` projects.
 Test parallelization is disabled in the integration projects on purpose: container-backed tests
 flake under Docker daemon load. See [CONTRIBUTING.md](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/CONTRIBUTING.md) for the project layout,
 the branching model, and how to add a service.

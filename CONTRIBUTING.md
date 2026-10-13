@@ -32,10 +32,12 @@ dotnet build Floci.Testcontainers.slnx -c Release -warnaserror
 # Unit tier — fast, no Docker.
 dotnet test tests/Floci.Testcontainers.Aws.Tests/Floci.Testcontainers.Aws.Tests.csproj -c Release
 dotnet test tests/Floci.Testcontainers.Az.Tests/Floci.Testcontainers.Az.Tests.csproj -c Release
+dotnet test tests/Floci.Testcontainers.Gcp.Tests/Floci.Testcontainers.Gcp.Tests.csproj -c Release
 
 # Integration tier — needs Docker; starts a real Floci container per test class.
 dotnet test tests/Floci.Testcontainers.Aws.IntegrationTests/Floci.Testcontainers.Aws.IntegrationTests.csproj -c Release
 dotnet test tests/Floci.Testcontainers.Az.IntegrationTests/Floci.Testcontainers.Az.IntegrationTests.csproj -c Release
+dotnet test tests/Floci.Testcontainers.Gcp.IntegrationTests/Floci.Testcontainers.Gcp.IntegrationTests.csproj -c Release
 ```
 
 ## Project structure
@@ -58,9 +60,16 @@ src/Floci.Testcontainers.Az/                      Azure module, built on the cor
   <Service>Config.cs                                One record per Azure service
 tests/Floci.Testcontainers.Az.Tests/              Unit tests (AzCloudTest, ServiceConfigTest, *ConfigTest) — no Docker
 tests/Floci.Testcontainers.Az.IntegrationTests/   Integration tests (*ServiceTest) — Docker required
+src/Floci.Testcontainers.Gcp/                     Google Cloud module, built on the core
+  GcpCloud                                          The Google Cloud descriptor and identity defaults
+  FlociGcpConfiguration / FlociGcpBuilder / FlociGcpContainer  The Testcontainers triad
+  GcpServiceConfig / GcpMockableServiceConfig       Bases: the enabled switch, plus the mock switch
+  <Service>Config.cs                                One record per Google Cloud service
+tests/Floci.Testcontainers.Gcp.Tests/             Unit tests (GcpCloudTest, ServiceConfigTest) — no Docker
+tests/Floci.Testcontainers.Gcp.IntegrationTests/  Integration tests (*ServiceTest) — Docker required
 ```
 
-GCP and OCI will arrive as sibling packages (`Floci.Testcontainers.Gcp`, `.Oci`) on the same core.
+OCI will arrive as a sibling package (`Floci.Testcontainers.Oci`) on the same core.
 
 ## Branching model
 

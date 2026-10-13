@@ -72,6 +72,7 @@ jobs:
         run: |
           dotnet test tests/Floci.Testcontainers.Aws.Tests/Floci.Testcontainers.Aws.Tests.csproj -c Release --no-build
           dotnet test tests/Floci.Testcontainers.Az.Tests/Floci.Testcontainers.Az.Tests.csproj -c Release --no-build
+          dotnet test tests/Floci.Testcontainers.Gcp.Tests/Floci.Testcontainers.Gcp.Tests.csproj -c Release --no-build
 
   integration:
     needs: changes
@@ -124,3 +125,4 @@ jobs:
         run: |
           dotnet test tests/Floci.Testcontainers.Aws.IntegrationTests/Floci.Testcontainers.Aws.IntegrationTests.csproj -c Release
           dotnet test tests/Floci.Testcontainers.Az.IntegrationTests/Floci.Testcontainers.Az.IntegrationTests.csproj -c Release
+          dotnet test tests/Floci.Testcontainers.Gcp.IntegrationTests/Floci.Testcontainers.Gcp.IntegrationTests.csproj -c Release
