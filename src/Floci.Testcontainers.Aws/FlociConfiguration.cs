@@ -31,6 +31,15 @@ public sealed class FlociConfiguration : ContainerConfiguration
     /// <summary>
     /// Initializes a new instance of the <see cref="FlociConfiguration" /> class.
     /// </summary>
+    /// <param name="serviceConfigs">The per-service configs; see <see cref="ServiceConfigs" />.</param>
+    public FlociConfiguration(FlociServiceConfigs serviceConfigs)
+    {
+        ServiceConfigs = serviceConfigs;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FlociConfiguration" /> class.
+    /// </summary>
     /// <param name="resourceConfiguration">The Docker resource configuration.</param>
     public FlociConfiguration(IResourceConfiguration<CreateContainerParameters> resourceConfiguration)
         : base(resourceConfiguration)
@@ -70,6 +79,7 @@ public sealed class FlociConfiguration : ContainerConfiguration
         AccountId = BuildConfiguration.Combine(oldValue.AccountId, newValue.AccountId);
         AvailabilityZone = BuildConfiguration.Combine(oldValue.AvailabilityZone, newValue.AvailabilityZone);
         DockerSocket = BuildConfiguration.Combine(oldValue.DockerSocket, newValue.DockerSocket);
+        ServiceConfigs = FlociServiceConfigs.Combine(oldValue.ServiceConfigs, newValue.ServiceConfigs);
     }
 
     /// <summary>
@@ -92,4 +102,10 @@ public sealed class FlociConfiguration : ContainerConfiguration
     /// services, an empty string to never mount it, or the host socket path to always mount.
     /// </summary>
     public string? DockerSocket { get; }
+
+    /// <summary>
+    /// Gets the per-service configs applied so far, one per service. Their environment variables
+    /// and fixed host ports are written when the container is built.
+    /// </summary>
+    public FlociServiceConfigs ServiceConfigs { get; } = FlociServiceConfigs.Empty;
 }

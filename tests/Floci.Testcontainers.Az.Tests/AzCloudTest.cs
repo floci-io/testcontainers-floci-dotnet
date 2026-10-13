@@ -120,6 +120,49 @@ public sealed class AzCloudTest
     }
 
     [Fact]
+    public void AReplacedConfigTakesItsSettingsWithIt()
+    {
+        var managed = new FlociAzBuilder(Image).WithSql(new SqlConfig { DataPlaneProvider = SqlDataPlaneProvider.Managed });
+        Assert.Equal("managed", managed.Environments["FLOCI_AZ_SERVICES_SQL_DATA_PLANE_PROVIDER"]);
+
+        // The default config does not set a provider, so the earlier one must not survive it...
+        var replaced = managed.WithSql(new SqlConfig());
+        Assert.DoesNotContain("FLOCI_AZ_SERVICES_SQL_DATA_PLANE_PROVIDER", replaced.Environments.Keys);
+
+        // ...nor may an enabled config's settings survive a disabled one.
+        var disabled = managed.WithSql(new SqlConfig { Enabled = false });
+        Assert.Equal(
+            new[] { "FLOCI_AZ_SERVICES_SQL_ENABLED" },
+            disabled.Environments.Keys.Where(key => key.StartsWith("FLOCI_AZ_SERVICES_SQL_", StringComparison.Ordinal)));
+
+        // The builder's own defaults are not a config's to take.
+        Assert.Equal("published", disabled.Environments["FLOCI_AZ_DOCKER_ENDPOINT_MODE"]);
+        Assert.Equal("0", disabled.Environments["FLOCI_AZ_TLS_HTTPS_PORT"]);
+        Assert.Equal("0", disabled.WithServiceSettings().Environments["FLOCI_AZ_TLS_HTTPS_PORT"]);
+    }
+
+    [Fact]
+    public void AnExplicitVariableOutlivesTheConfigsAppliedAroundIt()
+    {
+        var builder = new FlociAzBuilder(Image)
+            .WithSql(new SqlConfig { DataPlaneProvider = SqlDataPlaneProvider.Managed })
+            .WithEnvironment("FLOCI_AZ_SERVICES_SQL_DATA_PLANE_PROVIDER", "external")
+            .WithSql(new SqlConfig());
+
+        Assert.Equal("external", builder.Environments["FLOCI_AZ_SERVICES_SQL_DATA_PLANE_PROVIDER"]);
+        Assert.Equal("external", builder.WithServiceSettings().Environments["FLOCI_AZ_SERVICES_SQL_DATA_PLANE_PROVIDER"]);
+    }
+
+    [Fact]
+    public void SocketDetectionFollowsTheReplacement()
+    {
+        var builder = WithoutSocketServices().WithSql(new SqlConfig { DataPlaneProvider = SqlDataPlaneProvider.Managed });
+
+        Assert.Equal(FlociHost.HostDockerSocket(), builder.DockerSocketMount());
+        Assert.Null(builder.WithSql(new SqlConfig()).DockerSocketMount());
+    }
+
+    [Fact]
     public void ToleratesRepeatedApplication()
     {
         var builder = new FlociAzBuilder(Image)

@@ -557,21 +557,7 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
     private FlociBuilder WithServiceConfig(FlociServiceConfig config)
     {
-        var builder = this;
-        foreach (var entry in config.BuildEnvironment())
-        {
-            builder = builder.WithEnvironment(entry.Key, entry.Value);
-        }
-
-        if (config.Enabled)
-        {
-            foreach (var port in config.FixedHostPorts)
-            {
-                builder = builder.WithPortBinding(port, port);
-            }
-        }
-
-        return builder;
+        return Merge(DockerResourceConfiguration, new FlociConfiguration(FlociServiceConfigs.Empty.With(config)));
     }
 
     /// <summary>
@@ -618,7 +604,35 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     /// <summary>
     /// Gets the container environment as it stands.
     /// </summary>
-    internal IReadOnlyDictionary<string, string> Environments => DockerResourceConfiguration.Environments;
+    internal IReadOnlyDictionary<string, string> Environments =>
+        DockerResourceConfiguration.ServiceConfigs.Environment(DockerResourceConfiguration.Environments);
+
+    /// <summary>
+    /// Returns this builder with the environment variables and fixed host ports of its service
+    /// configs written to the container configuration. <see cref="Build" /> calls it first; until
+    /// then they are only kept, so that a config can still be replaced whole. Variables set with
+    /// <c>WithEnvironment</c> are left as they are.
+    /// </summary>
+    /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
+    internal FlociBuilder WithServiceSettings()
+    {
+        var builder = this;
+        var explicitEnvironment = DockerResourceConfiguration.Environments;
+        foreach (var entry in Environments)
+        {
+            if (!explicitEnvironment.ContainsKey(entry.Key))
+            {
+                builder = builder.WithEnvironment(entry.Key, entry.Value);
+            }
+        }
+
+        foreach (var port in DockerResourceConfiguration.ServiceConfigs.FixedHostPorts)
+        {
+            builder = builder.WithPortBinding(port, port);
+        }
+
+        return builder;
+    }
 
     /// <summary>
     /// Points RDS endpoints at the Docker host, as the Java module does, unless RDS is disabled or
@@ -630,7 +644,7 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     /// <returns>A configured instance of <see cref="FlociBuilder" />.</returns>
     internal FlociBuilder WithReachableRdsEndpoint()
     {
-        var env = DockerResourceConfiguration.Environments;
+        var env = Environments;
         var key = AwsCloud.Descriptor.ServiceEnv("RDS", "ENDPOINT_HOST");
         if (env.ContainsKey(key)
             || (env.TryGetValue(AwsCloud.Descriptor.ServiceEnv("RDS", "ENABLED"), out var enabled)
@@ -675,7 +689,7 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     /// will pick a fresh one.
     /// </summary>
     internal string? ResourceNamespace =>
-        DockerResourceConfiguration.Environments.TryGetValue(AwsCloud.Descriptor.ResourceNamespaceEnv, out var ns) ? ns : null;
+        Environments.TryGetValue(AwsCloud.Descriptor.ResourceNamespaceEnv, out var ns) ? ns : null;
 
     /// <summary>
     /// Returns this builder with a fresh resource namespace unless one is already set (through
@@ -700,7 +714,7 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
             return forced.Length == 0 ? null : forced;
         }
 
-        return AwsCloud.Descriptor.DockerSocketRequired(DockerResourceConfiguration.Environments)
+        return AwsCloud.Descriptor.DockerSocketRequired(Environments)
             ? FlociHost.HostDockerSocket()
             : null;
     }
@@ -709,7 +723,7 @@ public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer
     public override FlociContainer Build()
     {
         Validate();
-        var builder = WithDefaultResourceNamespace().WithReachableRdsEndpoint();
+        var builder = WithServiceSettings().WithDefaultResourceNamespace().WithReachableRdsEndpoint();
         var socket = builder.DockerSocketMount();
         builder = socket is null ? builder : builder.WithBindMount(socket, FlociHost.ContainerDockerSocket);
         return new FlociContainer(builder.DockerResourceConfiguration);
