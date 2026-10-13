@@ -27,7 +27,8 @@
 ## What is this?
 
 A [Testcontainers for .NET](https://dotnet.testcontainers.org/) module for
-[Floci](https://github.com/floci-io/floci), the free, open-source local AWS emulator.
+[Floci](https://github.com/floci-io/floci), the free, open-source local AWS emulator, and for
+[Floci Azure](https://github.com/floci-io/floci-az), its Azure counterpart (see [Azure](#azure)).
 
 It runs the `floci/floci` container for your integration tests, gives you an endpoint to point
 the AWS SDK for .NET at, and adds a **typed, per-service configuration API** over Floci's
@@ -52,7 +53,7 @@ popcorn.
 | Emulator                                           | Cloud | Port | Supported                                       |
 |----------------------------------------------------|-------|:----:|:-----------------------------------------------:|
 | [floci](https://github.com/floci-io/floci)         | AWS   | 4566 | ✅ [`Floci.Testcontainers.Aws`](#installation)   |
-| [floci-az](https://github.com/floci-io/floci-az)   | Azure | 4577 | Planned                                         |
+| [floci-az](https://github.com/floci-io/floci-az)   | Azure | 4577 | ✅ [`Floci.Testcontainers.Az`](#azure)           |
 | [floci-gcp](https://github.com/floci-io/floci-gcp) | GCP   | 4588 | Planned                                         |
 | [floci-oci](https://github.com/floci-io/floci-oci) | OCI   | 4599 | Planned                                         |
 
@@ -64,6 +65,9 @@ dotnet add package Floci.Testcontainers.Aws
 
 `Floci.Testcontainers.Aws` brings in `Floci.Testcontainers.Core`, the shared part every Floci cloud
 package builds on. Code lives in the `Floci.Testcontainers.Aws` namespace.
+
+For Azure, add `Floci.Testcontainers.Az` (namespace `Floci.Testcontainers.Az`). Its types carry an
+`Az` infix (`FlociAzBuilder`, `FlociAzContainer`), so one test project can reference both clouds.
 
 The packages are published to [nuget.org](https://www.nuget.org/packages/Floci.Testcontainers.Aws), so no
 feed or token setup is needed.
@@ -128,6 +132,56 @@ public sealed class OrderTests : IAsyncLifetime
     }
 }
 ```
+
+### Azure
+
+`FlociAzBuilder` starts [Floci Azure](https://github.com/floci-io/floci-az) (`floci/floci-az`) and
+`FlociAzContainer` gives the Azure SDK for .NET what it needs to connect:
+
+```csharp
+await using var floci = new FlociAzBuilder("floci/floci-az:latest").Build();
+await floci.StartAsync();
+
+var blobs = new BlobServiceClient(floci.GetStorageConnectionString());
+var container = (await blobs.CreateBlobContainerAsync("orders")).Value;
+await container.GetBlobClient("order-1.txt").UploadAsync(BinaryData.FromString("hello from floci"));
+```
+
+| Member                         | Description                                                             | Default                                  |
+|--------------------------------|-------------------------------------------------------------------------|------------------------------------------|
+| `GetEndpoint()`                | HTTP base URL of every service (e.g. `http://localhost:32781`)          | —                                        |
+| `GetHttpsEndpoint()`           | HTTPS base URL, served on the same port once `WithTls()` is set         | —                                        |
+| `GetTlsCertificateAsync()`     | PEM certificate HTTPS clients have to trust (needs `WithTls()`)         | —                                        |
+| `SubscriptionId`               | Default subscription                                                    | `00000000-0000-0000-0000-000000000001`   |
+| `TenantId`                     | Default Microsoft Entra ID tenant                                       | `00000000-0000-0000-0000-000000000002`   |
+| `AccountName` / `AccountKey`   | Default storage account and its key                                     | `devstoreaccount1`, the development key  |
+| `GetBlobEndpoint()`            | Blob Storage endpoint (`http://127.0.0.1:<port>/devstoreaccount1`)      | —                                        |
+| `GetQueueEndpoint()`           | Queue Storage endpoint (`…/devstoreaccount1-queue`)                     | —                                        |
+| `GetTableEndpoint()`           | Table Storage endpoint (`…/devstoreaccount1-table`)                     | —                                        |
+| `GetStorageConnectionString()` | Connection string with the Blob, Queue and Table endpoints              | —                                        |
+| `ResourceNamespace`            | Prefix of the sibling containers' names                                 | `tc-` + 8 hex                            |
+| `ResetAsync()`                 | Wipes all emulator state without restarting                             | —                                        |
+
+The storage endpoints, and so the connection string, address the emulator by IP (`127.0.0.1` rather
+than `localhost`): the Azure Storage SDK for .NET reads the account name from the URL path only when
+the host is an IP address. With `WithTls()`, `StartAsync` also waits until the emulator answers
+over HTTPS, which is slightly later than over HTTP, so HTTPS clients can connect straight away.
+
+Every Azure service has a config record with an `Enabled` switch, applied with `WithXxx(...)`
+(`WithBlob(new BlobConfig { Enabled = false })`). Services that can run without containers also have a
+`Mocked` switch whose default is the emulator's: Service Bus, Container Instances, Virtual Machines and
+Container Apps are mocked by default, while for example AKS, Redis, PostgreSQL and Functions run real
+sibling containers unless mocked. `CosmosConfig` and `SqlConfig` also carry the settings that decide
+whether they spawn containers. Other settings go through `WithEnvironment("FLOCI_AZ_SERVICES_…", …)`
+for now. The authoritative list of config records is the set of `*Config.cs` files in
+[`src/Floci.Testcontainers.Az`](https://github.com/floci-io/testcontainers-floci-dotnet/tree/main/src/Floci.Testcontainers.Az).
+
+The Docker socket, the resource namespace and sibling cleanup work as described under
+[Container-based services](#container-based-services). Other builder options: `WithTls()`,
+`WithLogLevel(level)`, `WithResourceNamespace`, `WithDockerSocket(path)` and `WithoutDockerSocket()`.
+The builder always sets `FLOCI_AZ_DOCKER_ENDPOINT_MODE=published` (so the addresses the emulator
+reports for its sibling containers are reachable from the test) and `FLOCI_AZ_TLS_HTTPS_PORT=0`;
+`WithEnvironment` overrides either. Readiness polls `/_floci/health` on port 4577.
 
 ## Service configuration
 
@@ -218,9 +272,11 @@ the floating `latest` tag; the .NET builder's baked-in default is a **pinned** t
 (a specific `x.y.z` release), exposed through the parameterless `FlociBuilder()` constructor and the
 `FlociBuilder.FlociImage` constant. Both are marked `[Obsolete]` and will be removed in a future
 version in favour of always passing the image, so new code should not rely on them.
+`FlociAzBuilder` has no default image at all: pass it, e.g. `new FlociAzBuilder("floci/floci-az:latest")`.
 
 The tag this repository's integration tests run against is declared in
-[`TestImages.cs`](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/tests/Floci.Testcontainers.Aws.IntegrationTests/TestImages.cs). The images cached
+[`TestImages.cs`](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/tests/Floci.Testcontainers.Aws.IntegrationTests/TestImages.cs)
+(Azure: [`TestImages.cs`](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/tests/Floci.Testcontainers.Az.IntegrationTests/TestImages.cs)). The images cached
 by CI are listed in [`.github/docker-images.txt`](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/.github/docker-images.txt).
 
 ## Requirements
@@ -238,8 +294,9 @@ dotnet test   # requires a running Docker daemon
 Unit tests (`*ConfigTest`, no Docker) live in
 [`tests/Floci.Testcontainers.Aws.Tests`](https://github.com/floci-io/testcontainers-floci-dotnet/tree/main/tests/Floci.Testcontainers.Aws.Tests) and integration tests
 (`*ServiceTest`, real Floci containers) in
-[`tests/Floci.Testcontainers.Aws.IntegrationTests`](https://github.com/floci-io/testcontainers-floci-dotnet/tree/main/tests/Floci.Testcontainers.Aws.IntegrationTests).
-Test parallelization is disabled in the integration project on purpose: container-backed tests
+[`tests/Floci.Testcontainers.Aws.IntegrationTests`](https://github.com/floci-io/testcontainers-floci-dotnet/tree/main/tests/Floci.Testcontainers.Aws.IntegrationTests);
+the Azure ones are in `tests/Floci.Testcontainers.Az.Tests` and `tests/Floci.Testcontainers.Az.IntegrationTests`.
+Test parallelization is disabled in the integration projects on purpose: container-backed tests
 flake under Docker daemon load. See [CONTRIBUTING.md](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/CONTRIBUTING.md) for the project layout,
 the branching model, and how to add a service.
 

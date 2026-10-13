@@ -113,4 +113,42 @@ public sealed class CoreTest
         .WithNeptune(new NeptuneConfig { Enabled = false })
         .WithOpenSearch(new OpenSearchConfig { Enabled = false })
         .WithRds(new RdsConfig { Enabled = false });
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("false")]
+    [InlineData("")]
+    public void KeepsTheWaitStrategiesWhileTlsIsOff(string? tlsEnabled)
+    {
+        var cloud = new CloudDescriptor("x", 4577, "FLOCI_X_", "/_floci/health", null, Array.Empty<SocketService>());
+        var env = new Dictionary<string, string>();
+        if (tlsEnabled is not null)
+        {
+            env["FLOCI_X_TLS_ENABLED"] = tlsEnabled;
+        }
+
+        var current = DotNet.Testcontainers.Builders.Wait.ForUnixContainer().Build().ToArray();
+
+        Assert.False(cloud.TlsEnabled(env));
+        Assert.Same(current, FlociReadiness.WithHttpsWhenTlsEnabled(cloud, env, current));
+    }
+
+    [Theory]
+    [InlineData("true")]
+    [InlineData("TRUE")]
+    public void AddsAnHttpsWaitAfterTheConfiguredOnesWhenTlsIsOn(string tlsEnabled)
+    {
+        var cloud = new CloudDescriptor("x", 4577, "FLOCI_X_", "/_floci/health", null, Array.Empty<SocketService>());
+        var env = new Dictionary<string, string> { ["FLOCI_X_TLS_ENABLED"] = tlsEnabled };
+        var current = DotNet.Testcontainers.Builders.Wait.ForUnixContainer().Build().ToArray();
+
+        var wanted = FlociReadiness.WithHttpsWhenTlsEnabled(cloud, env, current).ToArray();
+
+        Assert.Equal("FLOCI_X_TLS_ENABLED", cloud.TlsEnabledEnv);
+        Assert.True(cloud.TlsEnabled(env));
+        Assert.True(wanted.Length > current.Length);
+        Assert.Equal(current, wanted.Take(current.Length));
+        // Another cloud's switch does not count.
+        Assert.False(cloud.TlsEnabled(new Dictionary<string, string> { ["FLOCI_AZ_TLS_ENABLED"] = "true" }));
+    }
 }

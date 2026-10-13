@@ -18,11 +18,34 @@ namespace Floci.Testcontainers.Core;
 /// </param>
 /// <param name="InProcessMode">The mode value that spawns no containers.</param>
 [PublicAPI]
-public sealed record SocketService(string Token, bool Mockable = false, string? ModeSetting = null, string? InProcessMode = null);
+public sealed record SocketService(string Token, bool Mockable = false, string? ModeSetting = null, string? InProcessMode = null)
+{
+    /// <summary>
+    /// Gets the name of the mock flag of a <see cref="Mockable" /> service. Defaults to <c>MOCK</c>,
+    /// the AWS emulator's name; the Azure emulator calls it <c>MOCKED</c>.
+    /// </summary>
+    public string MockSetting { get; init; } = "MOCK";
+
+    /// <summary>
+    /// Gets a value indicating whether the emulator mocks the service unless told otherwise, so
+    /// an unset mock flag means no containers are spawned. Defaults to <see langword="false" />.
+    /// </summary>
+    public bool MockedByDefault { get; init; }
+
+    /// <summary>
+    /// Gets an extra condition for services whose container use depends on more than a mock flag
+    /// or a mode (e.g. Azure SQL's data-plane provider). It is asked once the service is known to
+    /// be enabled and not mocked, receives a lookup from one of the service's setting names (the
+    /// part after <c>&lt;prefix&gt;SERVICES_&lt;Token&gt;_</c>) to its value, or <see langword="null" />
+    /// when unset, and returns whether the socket is needed. It replaces the
+    /// <see cref="ModeSetting" /> check.
+    /// </summary>
+    public Func<Func<string, string?>, bool>? Condition { get; init; }
+}
 
 /// <summary>
 /// The facts that tell one Floci emulator apart from another, as data. A cloud package
-/// (<c>Floci.Testcontainers.Aws</c> today; Azure, GCP and OCI later) is this descriptor plus its
+/// (<c>Floci.Testcontainers.Aws</c>, <c>Floci.Testcontainers.Az</c>; GCP and OCI later) is this descriptor plus its
 /// own service configs and connection helpers.
 /// </summary>
 /// <param name="Name">Short cloud name, e.g. <c>aws</c>.</param>
@@ -45,6 +68,17 @@ public sealed record CloudDescriptor(
 
     /// <summary>Gets the env var that prefixes sibling container names, keeping parallel runs apart.</summary>
     public string ResourceNamespaceEnv => EnvPrefix + "DOCKER_RESOURCE_NAMESPACE";
+
+    /// <summary>Gets the env var that makes the emulator serve HTTPS next to HTTP on its port.</summary>
+    public string TlsEnabledEnv => EnvPrefix + "TLS_ENABLED";
+
+    /// <summary>Returns whether TLS is enabled in <paramref name="env" />. It is off by default.</summary>
+    /// <param name="env">The container environment, as it will be when the container starts.</param>
+    /// <returns><see langword="true" /> when the emulator will serve HTTPS.</returns>
+    public bool TlsEnabled(IReadOnlyDictionary<string, string> env)
+    {
+        return env.TryGetValue(TlsEnabledEnv, out var enabled) && string.Equals(enabled, "true", StringComparison.OrdinalIgnoreCase);
+    }
 
     /// <summary>Gets the env var of one service setting, e.g. <c>ServiceEnv("SQS", "ENABLED")</c>.</summary>
     /// <param name="token">The service token.</param>
@@ -75,11 +109,20 @@ public sealed record CloudDescriptor(
             return false;
         }
 
-        if (svc.Mockable
-            && env.TryGetValue(ServiceEnv(svc.Token, "MOCK"), out var mock)
-            && string.Equals(mock, "true", StringComparison.OrdinalIgnoreCase))
+        if (svc.Mockable)
         {
-            return false;
+            var mocked = env.TryGetValue(ServiceEnv(svc.Token, svc.MockSetting), out var mock)
+                ? string.Equals(mock, "true", StringComparison.OrdinalIgnoreCase)
+                : svc.MockedByDefault;
+            if (mocked)
+            {
+                return false;
+            }
+        }
+
+        if (svc.Condition is not null)
+        {
+            return svc.Condition(setting => env.TryGetValue(ServiceEnv(svc.Token, setting), out var value) ? value : null);
         }
 
         if (svc.ModeSetting is not null)
