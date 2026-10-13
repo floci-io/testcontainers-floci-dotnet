@@ -200,6 +200,10 @@ adding its `WithXxx`; Floci enables most services by default regardless. See the
 [Floci documentation](https://floci.io/floci/services/) for the full list of services the
 emulator supports.
 
+Applying a config for a service again replaces the earlier one whole: nothing the first one set
+stays behind, in every cloud package. A variable you set yourself with `WithEnvironment` is kept and
+wins over the same variable from a config, whichever was applied first.
+
 ### Supported services
 
 **Flat services** (single endpoint), for example S3, SQS, SNS, DynamoDB, Secrets Manager, SSM,

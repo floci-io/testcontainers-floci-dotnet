@@ -329,14 +329,42 @@ public sealed class FlociAzBuilder : ContainerBuilder<FlociAzBuilder, FlociAzCon
     /// <summary>
     /// Gets the container environment as it stands.
     /// </summary>
-    internal IReadOnlyDictionary<string, string> Environments => DockerResourceConfiguration.Environments;
+    internal IReadOnlyDictionary<string, string> Environments =>
+        DockerResourceConfiguration.ServiceConfigs.Environment(DockerResourceConfiguration.Environments);
+
+    /// <summary>
+    /// Returns this builder with the environment variables and fixed host ports of its service
+    /// configs written to the container configuration. <see cref="Build" /> calls it first; until
+    /// then they are only kept, so that a config can still be replaced whole. Variables set with
+    /// <c>WithEnvironment</c> are left as they are.
+    /// </summary>
+    /// <returns>A configured instance of <see cref="FlociAzBuilder" />.</returns>
+    internal FlociAzBuilder WithServiceSettings()
+    {
+        var builder = this;
+        var explicitEnvironment = DockerResourceConfiguration.Environments;
+        foreach (var entry in Environments)
+        {
+            if (!explicitEnvironment.ContainsKey(entry.Key))
+            {
+                builder = builder.WithEnvironment(entry.Key, entry.Value);
+            }
+        }
+
+        foreach (var port in DockerResourceConfiguration.ServiceConfigs.FixedHostPorts)
+        {
+            builder = builder.WithPortBinding(port, port);
+        }
+
+        return builder;
+    }
 
     /// <summary>
     /// Gets the resource namespace set so far, or <see langword="null" /> when <see cref="Build" />
     /// will pick a fresh one.
     /// </summary>
     internal string? ResourceNamespace =>
-        DockerResourceConfiguration.Environments.TryGetValue(AzCloud.Descriptor.ResourceNamespaceEnv, out var ns) ? ns : null;
+        Environments.TryGetValue(AzCloud.Descriptor.ResourceNamespaceEnv, out var ns) ? ns : null;
 
     /// <summary>
     /// Returns this builder with a fresh resource namespace unless one is already set (through
@@ -363,7 +391,7 @@ public sealed class FlociAzBuilder : ContainerBuilder<FlociAzBuilder, FlociAzCon
     internal FlociAzBuilder WithTlsReadiness()
     {
         var current = DockerResourceConfiguration.WaitStrategies;
-        var wanted = FlociReadiness.WithHttpsWhenTlsEnabled(AzCloud.Descriptor, DockerResourceConfiguration.Environments, current);
+        var wanted = FlociReadiness.WithHttpsWhenTlsEnabled(AzCloud.Descriptor, Environments, current);
         return ReferenceEquals(wanted, current) ? this : Clone(new ContainerConfiguration(waitStrategies: wanted));
     }
 
@@ -379,7 +407,7 @@ public sealed class FlociAzBuilder : ContainerBuilder<FlociAzBuilder, FlociAzCon
             return forced.Length == 0 ? null : forced;
         }
 
-        return AzCloud.Descriptor.DockerSocketRequired(DockerResourceConfiguration.Environments)
+        return AzCloud.Descriptor.DockerSocketRequired(Environments)
             ? FlociHost.HostDockerSocket()
             : null;
     }
@@ -388,7 +416,7 @@ public sealed class FlociAzBuilder : ContainerBuilder<FlociAzBuilder, FlociAzCon
     public override FlociAzContainer Build()
     {
         Validate();
-        var builder = WithDefaultResourceNamespace().WithTlsReadiness();
+        var builder = WithServiceSettings().WithDefaultResourceNamespace().WithTlsReadiness();
         var socket = builder.DockerSocketMount();
         builder = socket is null ? builder : builder.WithBindMount(socket, FlociHost.ContainerDockerSocket);
         return new FlociAzContainer(builder.DockerResourceConfiguration);
@@ -420,21 +448,7 @@ public sealed class FlociAzBuilder : ContainerBuilder<FlociAzBuilder, FlociAzCon
     /// <returns>A configured instance of <see cref="FlociAzBuilder" />.</returns>
     private FlociAzBuilder WithServiceConfig(FlociServiceConfig config)
     {
-        var builder = this;
-        foreach (var entry in config.BuildEnvironment())
-        {
-            builder = builder.WithEnvironment(entry.Key, entry.Value);
-        }
-
-        if (config.Enabled)
-        {
-            foreach (var port in config.FixedHostPorts)
-            {
-                builder = builder.WithPortBinding(port, port);
-            }
-        }
-
-        return builder;
+        return Merge(DockerResourceConfiguration, new FlociAzConfiguration(FlociServiceConfigs.Empty.With(config)));
     }
 
     /// <inheritdoc />

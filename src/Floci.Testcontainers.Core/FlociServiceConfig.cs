@@ -39,6 +39,12 @@ public abstract record FlociServiceConfig
     internal string ServiceToken => ServiceKey;
 
     /// <summary>
+    /// Gets the prefix of every env var of the service, e.g. <c>FLOCI_SERVICES_SQS_</c>. It
+    /// identifies the service among the configs applied to a builder.
+    /// </summary>
+    internal string EnvPrefix => ServicesPrefix + ServiceKey + "_";
+
+    /// <summary>
     /// Adds the service-specific settings to <paramref name="env" />. Only called when the
     /// service is enabled. <paramref name="prefix" /> already includes the trailing underscore
     /// (e.g. <c>FLOCI_SERVICES_SQS_</c>).
@@ -67,7 +73,7 @@ public abstract record FlociServiceConfig
     /// <returns>The environment variables to apply to the container.</returns>
     internal IReadOnlyDictionary<string, string> BuildEnvironment()
     {
-        var prefix = ServicesPrefix + ServiceKey + "_";
+        var prefix = EnvPrefix;
 
         var env = new Dictionary<string, string>
         {

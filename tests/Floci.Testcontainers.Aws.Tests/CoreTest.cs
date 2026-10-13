@@ -151,4 +151,77 @@ public sealed class CoreTest
         // Another cloud's switch does not count.
         Assert.False(cloud.TlsEnabled(new Dictionary<string, string> { ["FLOCI_AZ_TLS_ENABLED"] = "true" }));
     }
+
+    [Fact]
+    public void AReplacedConfigTakesItsSettingsWithIt()
+    {
+        var builder = new FlociBuilder(Image)
+            .WithSqs(new SqsConfig { VisibilityTimeout = 60 })
+            .WithRds(new RdsConfig { ProxyBasePort = 7010 })
+            .WithSqs(new SqsConfig { Enabled = false });
+
+        // Disabled, SQS emits its switch and nothing else; RDS is untouched.
+        Assert.Equal(
+            new[] { "FLOCI_SERVICES_SQS_ENABLED" },
+            builder.Environments.Keys.Where(key => key.StartsWith("FLOCI_SERVICES_SQS_", StringComparison.Ordinal)));
+        Assert.Equal("false", builder.Environments["FLOCI_SERVICES_SQS_ENABLED"]);
+        Assert.Equal("7010", builder.Environments["FLOCI_SERVICES_RDS_PROXY_BASE_PORT"]);
+
+        // Enabled again with defaults, the earlier custom value is gone too.
+        Assert.Equal("30", builder.WithSqs(new SqsConfig()).Environments["FLOCI_SERVICES_SQS_DEFAULT_VISIBILITY_TIMEOUT"]);
+    }
+
+    [Fact]
+    public void AnExplicitVariableWinsOverAConfigWhicheverCameFirst()
+    {
+        var after = new FlociBuilder(Image)
+            .WithSqs(new SqsConfig { VisibilityTimeout = 60 })
+            .WithEnvironment("FLOCI_SERVICES_SQS_DEFAULT_VISIBILITY_TIMEOUT", "5");
+        var before = new FlociBuilder(Image)
+            .WithEnvironment("FLOCI_SERVICES_SQS_DEFAULT_VISIBILITY_TIMEOUT", "5")
+            .WithSqs(new SqsConfig { VisibilityTimeout = 60 });
+
+        Assert.Equal("5", after.Environments["FLOCI_SERVICES_SQS_DEFAULT_VISIBILITY_TIMEOUT"]);
+        Assert.Equal("5", before.Environments["FLOCI_SERVICES_SQS_DEFAULT_VISIBILITY_TIMEOUT"]);
+
+        // A config applied later replaces the config, not what the caller set by hand.
+        Assert.Equal("5", after.WithSqs(new SqsConfig { Enabled = false }).Environments["FLOCI_SERVICES_SQS_DEFAULT_VISIBILITY_TIMEOUT"]);
+    }
+
+    [Fact]
+    public void BuildWritesTheSurvivingConfigsToTheContainerConfiguration()
+    {
+        var written = new FlociBuilder(Image).WithSqs(new SqsConfig { VisibilityTimeout = 60 }).WithServiceSettings();
+
+        Assert.Equal("60", written.Environments["FLOCI_SERVICES_SQS_DEFAULT_VISIBILITY_TIMEOUT"]);
+        // Once written they are container variables like any other, so a config no longer displaces them.
+        Assert.Equal("60", written.WithSqs(new SqsConfig()).Environments["FLOCI_SERVICES_SQS_DEFAULT_VISIBILITY_TIMEOUT"]);
+        // Writing twice changes nothing.
+        Assert.Equal(written.Environments, written.WithServiceSettings().Environments);
+    }
+
+    [Fact]
+    public void OnlyTheSurvivingEnabledConfigsPublishFixedPorts()
+    {
+        var configs = FlociServiceConfigs.Empty.With(new RdsConfig { ProxyBasePort = 7010, ProxyPortsCount = 2 });
+
+        Assert.Equal(new[] { 7010, 7011 }, configs.FixedHostPorts);
+        Assert.Equal(new[] { 7020, 7021 }, configs.With(new RdsConfig { ProxyBasePort = 7020, ProxyPortsCount = 2 }).FixedHostPorts);
+        Assert.Empty(configs.With(new RdsConfig { Enabled = false }).FixedHostPorts);
+        Assert.Empty(FlociServiceConfigs.Empty.FixedHostPorts);
+    }
+
+    [Fact]
+    public void MergingConfigSetsReplacesServiceByService()
+    {
+        var older = FlociServiceConfigs.Empty.With(new SqsConfig { VisibilityTimeout = 60 }).With(new S3Config { Enabled = false });
+        var newer = FlociServiceConfigs.Empty.With(new SqsConfig { Enabled = false });
+        var none = new Dictionary<string, string>();
+
+        Assert.Same(older, FlociServiceConfigs.Combine(older, FlociServiceConfigs.Empty));
+        Assert.Equal(
+            new Dictionary<string, string> { ["FLOCI_SERVICES_SQS_ENABLED"] = "false", ["FLOCI_SERVICES_S3_ENABLED"] = "false" },
+            FlociServiceConfigs.Combine(older, newer).Environment(none));
+        Assert.Same(none, FlociServiceConfigs.Empty.Environment(none));
+    }
 }

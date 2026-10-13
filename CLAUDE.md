@@ -114,6 +114,14 @@ service list and tokens come from `ServicesConfig` in `floci-az`'s `EmulatorConf
 
 - **Records with `init` properties**, not Java-style inner Builders. Idiomatic C#, low boilerplate.
 - **Naming: `XxxConfig`** (matches upstream; avoids clashing with `FlociConfiguration`).
+- **Service configs are kept, not written, until `Build()`**: `WithXxx(config)` stores the config in
+  the configuration's `ServiceConfigs` (core `FlociServiceConfigs`, one per service, the later one
+  replaces the earlier one whole). A Testcontainers configuration can only add environment variables
+  and port bindings, so writing them at `WithXxx` time left a replaced config's settings and fixed
+  ports behind. `Build()` calls `WithServiceSettings()` first, which writes the surviving configs'
+  variables and ports. A variable set with `WithEnvironment` wins over a config's **whichever came
+  first**. Inside a builder read the environment through the internal `Environments` (configs plus
+  explicit variables), never `DockerResourceConfiguration.Environments`, which lacks the configs.
 - **Env scheme: `FLOCI_SERVICES_<SERVICE>_<SETTING>`**; `ENABLED` always emitted, other settings
   only when enabled. Top-level: `FLOCI_DEFAULT_REGION` / `FLOCI_DEFAULT_ACCOUNT_ID` /
   `FLOCI_DEFAULT_AVAILABILITY_ZONE`. Verified against the running image — match Java keys exactly.
