@@ -19,7 +19,9 @@ Intended to be contributed upstream to the `floci-io` org.
 - `tests/Floci.Testcontainers.Aws.IntegrationTests/` — Docker-backed `*ServiceTest`
 - `src/Floci.Testcontainers.Az/` — the Azure module (package `Floci.Testcontainers.Az`), see "Azure" below
 - `tests/Floci.Testcontainers.Az.Tests/` and `tests/Floci.Testcontainers.Az.IntegrationTests/` — its tests
-- GCP and OCI will be sibling packages (`Floci.Testcontainers.Gcp`, `.Oci`) on the same core.
+- `src/Floci.Testcontainers.Gcp/` — the Google Cloud module (package `Floci.Testcontainers.Gcp`), see "GCP" below
+- `tests/Floci.Testcontainers.Gcp.Tests/` and `tests/Floci.Testcontainers.Gcp.IntegrationTests/` — its tests
+- OCI will be a sibling package (`Floci.Testcontainers.Oci`) on the same core.
   The old id `Testcontainers.Floci` belongs to the official testcontainers-dotnet module on nuget.org,
   hence the `Floci.` prefix.
 - Local read-only reference (not in this repo): the upstream Java module at
@@ -108,6 +110,43 @@ service list and tokens come from `ServicesConfig` in `floci-az`'s `EmulatorConf
   namespaces are meant to be imported together; and `PolicyConfig` (`FLOCI_AZ_SERVICES_POLICY_ENABLED`),
   which the emulator has and Java does not yet.
 - Image: tests use `TestImages.FlociAz` (`floci/floci-az:0.14.0`); keep it in sync with
+  `.github/docker-images.txt`.
+
+## GCP (`Floci.Testcontainers.Gcp`)
+
+Starts `floci/floci-gcp` (port 4588, prefix `FLOCI_GCP_`, health `/_floci-gcp/health`, reset
+`POST /_floci-gcp/state/reset`). Triad with a `Gcp` infix (`FlociGcpConfiguration` / `FlociGcpBuilder` /
+`FlociGcpContainer`); `GcpCloud` holds the descriptor and the default project. **There is no Java
+reference**: the source of truth is `ServicesConfig` in `floci-gcp`'s `EmulatorConfig.java` and its
+`docs/`, read at the pinned tag.
+
+- **Scope is the cloud MVP**: every service has a record with `Enabled`, and `Mock` where the emulator
+  has a mock switch (`GcpMockableServiceConfig`; the key is `…_MOCK`, default `false`). No other typed
+  settings yet.
+- **Socket table**: `GcpCloud.Descriptor.SocketServices` is BigQuery, Cloud Run, Cloud SQL, GKE and
+  Kafka, the five mockable services. BigQuery has a `Condition`: with
+  `FLOCI_GCP_SERVICES_BIGQUERY_DUCK_URL` set it uses that sidecar and spawns nothing. Cloud Functions
+  is metadata only (no runtime), so it is not in the table. `GcpCloudTest` keeps table and configs in step.
+- **No baked-in image**: `FlociGcpBuilder` only has constructors that take the image.
+- **TLS readiness**: as in Azure, `Build()` adds the core's HTTPS wait when `FLOCI_GCP_TLS_ENABLED=true`
+  is in the final environment (the same proxy race exists here; the backend port is 4581).
+- **Always set, overridable**: `FLOCI_GCP_TLS_HTTPS_PORT=0`. `FLOCI_GCP_SERVICES_GKE_ENDPOINT_MODE` is
+  left at the emulator's default `host`, which advertises `localhost:<published port>`; `network` would
+  advertise the k3s container's name, which only resolves inside the Docker network.
+- **Connection helpers**: `GetEndpoint()` (`http://host:port`, no trailing slash), `GetHostAndPort()`
+  (gRPC is served in plain text on the same port), `ProjectId` (`WithProjectId` sets
+  `FLOCI_GCP_DEFAULT_PROJECT_ID`) and `GetEmulatorEnv()`. In that map every `*_EMULATOR_HOST` is
+  `host:port` except `STORAGE_EMULATOR_HOST`, which is a URL. The emulator itself reads none of these;
+  they are for the Google client libraries. No library reads `LOGGING_EMULATOR_HOST` or
+  `KMS_EMULATOR_HOST` (floci-gcp's compatibility tests do); they are kept for the family contract.
+- **Type names that clash with the AWS package carry the cloud prefix**: `GcpIamConfig`,
+  `GcpKmsConfig`, `GcpSchedulerConfig` (AWS has `IamConfig`, `KmsConfig`, `SchedulerConfig`, and the
+  namespaces are meant to be imported together). The builder methods stay `WithIam`, `WithKms`,
+  `WithScheduler`.
+- **Integration tests set process environment variables**: `FlociGcpFixture` applies
+  `GetEmulatorEnv()` to the test process so clients are built with emulator detection, which is only
+  safe because the suite runs serially.
+- Image: tests use `TestImages.FlociGcp` (`floci/floci-gcp:0.10.0`); keep it in sync with
   `.github/docker-images.txt`.
 
 ## Conventions & decisions (do not relitigate)

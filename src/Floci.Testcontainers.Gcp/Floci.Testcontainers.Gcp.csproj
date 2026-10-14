@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0;net10.0;netstandard2.0;netstandard2.1</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Package">
+    <PackageId>Floci.Testcontainers.Gcp</PackageId>
+    <Authors>Floci and its contributors</Authors>
+    <Description>A Testcontainers for .NET module for Floci GCP, the free, open-source local Google Cloud emulator (floci/floci-gcp).</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/floci-io/testcontainers-floci-dotnet</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/floci-io/testcontainers-floci-dotnet</RepositoryUrl>
+    <PackageTags>testcontainers;floci;gcp;google-cloud;emulator;testing;docker</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="JetBrains.Annotations" Version="2026.2.0" />
+    <PackageReference Include="Testcontainers" Version="4.16.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Floci.Testcontainers.Core\Floci.Testcontainers.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Floci.Testcontainers.Gcp.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Shown as the package page on nuget.org. -->
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+</Project>
