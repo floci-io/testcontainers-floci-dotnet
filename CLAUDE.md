@@ -21,7 +21,8 @@ Intended to be contributed upstream to the `floci-io` org.
 - `tests/Floci.Testcontainers.Az.Tests/` and `tests/Floci.Testcontainers.Az.IntegrationTests/` — its tests
 - `src/Floci.Testcontainers.Gcp/` — the Google Cloud module (package `Floci.Testcontainers.Gcp`), see "GCP" below
 - `tests/Floci.Testcontainers.Gcp.Tests/` and `tests/Floci.Testcontainers.Gcp.IntegrationTests/` — its tests
-- OCI will be a sibling package (`Floci.Testcontainers.Oci`) on the same core.
+- `src/Floci.Testcontainers.Oci/` — the OCI module (package `Floci.Testcontainers.Oci`), see "OCI" below
+- `tests/Floci.Testcontainers.Oci.Tests/` and `tests/Floci.Testcontainers.Oci.IntegrationTests/` — its tests
   The old id `Testcontainers.Floci` belongs to the official testcontainers-dotnet module on nuget.org,
   hence the `Floci.` prefix.
 - Local read-only reference (not in this repo): the upstream Java module at
@@ -147,6 +148,46 @@ reference**: the source of truth is `ServicesConfig` in `floci-gcp`'s `EmulatorC
   `GetEmulatorEnv()` to the test process so clients are built with emulator detection, which is only
   safe because the suite runs serially.
 - Image: tests use `TestImages.FlociGcp` (`floci/floci-gcp:0.10.0`); keep it in sync with
+  `.github/docker-images.txt`.
+
+## OCI (`Floci.Testcontainers.Oci`)
+
+Starts `floci/floci-oci` (port 4599, prefix `FLOCI_OCI_`, health `/_floci-oci/health`, reset
+`POST /_floci-oci/state/reset`). Triad with an `Oci` infix; `OciCloud` holds the descriptor and the
+identity defaults. **There is no Java reference**: the source of truth is `ServicesConfig` in
+`floci-oci`'s `EmulatorConfig.java` and its `docs/`, read at the pinned tag.
+
+- **Scope is the cloud MVP**: every service has a record with `Enabled`; Functions and OKE, the two
+  that spawn containers, also have `Mock` (`OciMockableServiceConfig`, key `…_MOCK`, default `false`)
+  and are the whole socket table. No other typed settings yet.
+- **No baked-in image**; **always set, overridable**: `FLOCI_OCI_TLS_HTTPS_PORT=0`.
+- **Credentials**: the OCI SDKs and CLI refuse to run without an API key, while the emulator parses
+  the signature's `keyId` (`tenancy/user/fingerprint`) and never verifies it. So the container hands
+  out `UserId` and `Fingerprint` (the fixed placeholders of the emulator's docs), `TenancyId`,
+  `Region`, and `GetPrivateKeyPem()`: a 2048-bit RSA key generated lazily, once per container object.
+  `GetConfigFileContents(keyFilePath, profile)` renders an `~/.oci/config` profile from them; the
+  caller writes the key and the config to disk. The fingerprint is **not** that of the key.
+  `WithPrivateKeyPem` replaces the generated key (kept in `FlociOciConfiguration.PrivateKeyPem`).
+- **`RsaKeyPem` encodes PKCS#1 DER by hand** because `netstandard2.0` has no key export. `RsaKeyPemTest`
+  checks it byte for byte against the platform's own export.
+- **The tenancy is the partition**: resources are kept per tenancy taken from the signature, and
+  unsigned requests use `FLOCI_OCI_DEFAULT_TENANCY_ID`. `WithTenancyId` sets that default and the
+  tenancy of the handed-out credentials together, so both see the same resources.
+- **`FLOCI_OCI_AUTH_REQUIRE_SIGNATURE=true` cannot be used with this container on 0.4.2**: the emulator
+  then answers 401 on its own exempt paths (`/health`, `/_floci-oci/*`), so the readiness wait never
+  succeeds. It is an emulator bug; do not work around it here. That is why no test enables it.
+- **OCI SDK for .NET gotcha**: `client.SetEndpoint(...)` alone is not enough. The client built from a
+  region keeps that region's endpoint template and prefers it per request, so `ObjectStorageClient`
+  148.1.0 called Oracle's real endpoint (401 "The required information to complete authentication was
+  not provided"). Follow it with `client.SetRealmSpecificEndpointTemplate(null)`, as `OciSdk` in the
+  integration tests does.
+- **No TLS helpers**: floci-oci 0.4.2 can serve HTTPS (`FLOCI_OCI_TLS_ENABLED`) but has no endpoint to
+  fetch its self-signed certificate from (floci-az and floci-gcp have `/…/tls-cert`), so there is no
+  `WithTls` / `GetHttpsEndpoint` here yet. `Build()` still adds the core's HTTPS wait when
+  `FLOCI_OCI_TLS_ENABLED=true` is set through `WithEnvironment`; `TlsServiceTest` covers that.
+- **Type names that clash with another cloud package carry the cloud prefix**: `OciFunctionsConfig`,
+  `OciKmsConfig`, `OciQueueConfig`. The builder methods stay `WithFunctions`, `WithKms`, `WithQueue`.
+- Image: tests use `TestImages.FlociOci` (`floci/floci-oci:0.4.2`); keep it in sync with
   `.github/docker-images.txt`.
 
 ## Conventions & decisions (do not relitigate)

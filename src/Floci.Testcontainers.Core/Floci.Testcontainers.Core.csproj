@@ -31,6 +31,8 @@
     <InternalsVisibleTo Include="Floci.Testcontainers.Az.Tests" />
     <InternalsVisibleTo Include="Floci.Testcontainers.Gcp" />
     <InternalsVisibleTo Include="Floci.Testcontainers.Gcp.Tests" />
+    <InternalsVisibleTo Include="Floci.Testcontainers.Oci" />
+    <InternalsVisibleTo Include="Floci.Testcontainers.Oci.Tests" />
   </ItemGroup>
 
   <ItemGroup>

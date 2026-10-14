@@ -28,8 +28,9 @@
 
 A [Testcontainers for .NET](https://dotnet.testcontainers.org/) module for
 [Floci](https://github.com/floci-io/floci), the free, open-source local AWS emulator, and for
-[Floci Azure](https://github.com/floci-io/floci-az) and [Floci GCP](https://github.com/floci-io/floci-gcp),
-its Azure and Google Cloud counterparts (see [Azure](#azure) and [GCP](#gcp)).
+[Floci Azure](https://github.com/floci-io/floci-az), [Floci GCP](https://github.com/floci-io/floci-gcp) and
+[Floci OCI](https://github.com/floci-io/floci-oci), its Azure, Google Cloud and Oracle Cloud counterparts
+(see [Azure](#azure), [GCP](#gcp) and [OCI](#oci)).
 
 It runs the `floci/floci` container for your integration tests, gives you an endpoint to point
 the AWS SDK for .NET at, and adds a **typed, per-service configuration API** over Floci's
@@ -56,7 +57,7 @@ popcorn.
 | [floci](https://github.com/floci-io/floci)         | AWS   | 4566 | ✅ [`Floci.Testcontainers.Aws`](#installation)   |
 | [floci-az](https://github.com/floci-io/floci-az)   | Azure | 4577 | ✅ [`Floci.Testcontainers.Az`](#azure)           |
 | [floci-gcp](https://github.com/floci-io/floci-gcp) | GCP   | 4588 | ✅ [`Floci.Testcontainers.Gcp`](#gcp)            |
-| [floci-oci](https://github.com/floci-io/floci-oci) | OCI   | 4599 | Planned                                         |
+| [floci-oci](https://github.com/floci-io/floci-oci) | OCI   | 4599 | ✅ [`Floci.Testcontainers.Oci`](#oci)            |
 
 ## Installation
 
@@ -67,9 +68,10 @@ dotnet add package Floci.Testcontainers.Aws
 `Floci.Testcontainers.Aws` brings in `Floci.Testcontainers.Core`, the shared part every Floci cloud
 package builds on. Code lives in the `Floci.Testcontainers.Aws` namespace.
 
-For Azure, add `Floci.Testcontainers.Az` (namespace `Floci.Testcontainers.Az`); for Google Cloud,
-`Floci.Testcontainers.Gcp` (namespace `Floci.Testcontainers.Gcp`). Their types carry an `Az` or `Gcp`
-infix (`FlociAzBuilder`, `FlociGcpContainer`), so one test project can reference several clouds.
+For Azure, add `Floci.Testcontainers.Az`; for Google Cloud, `Floci.Testcontainers.Gcp`; for Oracle
+Cloud, `Floci.Testcontainers.Oci`. Each has a namespace of the same name, and its types carry an `Az`,
+`Gcp` or `Oci` infix (`FlociAzBuilder`, `FlociGcpContainer`), so one test project can reference
+several clouds.
 
 The packages are published to [nuget.org](https://www.nuget.org/packages/Floci.Testcontainers.Aws), so no
 feed or token setup is needed.
@@ -252,6 +254,67 @@ The Docker socket, the resource namespace and sibling cleanup work as described 
 overrides it. Readiness polls `/_floci-gcp/health` on port 4588, over HTTPS as well once `WithTls()` is
 set, so HTTPS clients can connect as soon as `StartAsync` returns.
 
+### OCI
+
+`FlociOciBuilder` starts [Floci OCI](https://github.com/floci-io/floci-oci) (`floci/floci-oci`) and
+`FlociOciContainer` gives the OCI SDK for .NET what it needs to connect. The SDK insists on an API
+key, so the container hands out a throwaway one together with a matching config-file profile; the
+emulator reads the tenancy and user from the request signature but never verifies it.
+
+```csharp
+await using var floci = new FlociOciBuilder("floci/floci-oci:latest").Build();
+await floci.StartAsync();
+
+File.WriteAllText(keyFile, floci.GetPrivateKeyPem());
+File.WriteAllText(configFile, floci.GetConfigFileContents(keyFile));
+
+using var client = new ObjectStorageClient(new ConfigFileAuthenticationDetailsProvider(configFile, "DEFAULT"));
+client.SetEndpoint(floci.GetEndpoint());
+client.SetRealmSpecificEndpointTemplate(null); // or the SDK keeps calling the region's real endpoint
+
+await client.CreateBucket(new CreateBucketRequest
+{
+    NamespaceName = floci.Namespace,
+    CreateBucketDetails = new CreateBucketDetails { Name = "orders", CompartmentId = floci.TenancyId },
+});
+```
+
+| Member                                     | Description                                                       | Default                                    |
+|--------------------------------------------|-------------------------------------------------------------------|--------------------------------------------|
+| `GetEndpoint()`                            | HTTP base URL of every service (e.g. `http://localhost:32781`)    | —                                          |
+| `Region`                                   | Region                                                            | `us-ashburn-1`                             |
+| `TenancyId`                                | Tenancy OCID, also the root compartment                           | `ocid1.tenancy.oc1..flocilocaltenancy0…`   |
+| `Namespace`                                | Object Storage namespace                                          | `floci-local`                              |
+| `UserId`                                   | User OCID to sign requests with                                   | `ocid1.user.oc1..flocilocaluser0…`         |
+| `Fingerprint`                              | API key fingerprint to sign requests with (a fixed placeholder)   | `aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99` |
+| `GetPrivateKeyPem()`                       | Throwaway 2048-bit RSA key (PEM), generated once per container    | —                                          |
+| `GetConfigFileContents(keyFile, profile)`  | An `~/.oci/config` profile with the values above                  | profile `DEFAULT`                          |
+| `ResourceNamespace`                        | Prefix of the sibling containers' names                           | `tc-` + 8 hex                              |
+| `ResetAsync()`                             | Wipes all emulator state without restarting                       | —                                          |
+
+The endpoint is not part of an OCI config file, so set `GetEndpoint()` on every client (or pass it to
+`oci --endpoint`). With the OCI SDK for .NET also clear the client's endpoint template, as above:
+`ObjectStorageClient` 148.1.0 otherwise ignores `SetEndpoint` and sends the request to Oracle. The emulator keeps resources per tenancy: requests signed with another tenancy
+OCID see their own, empty set.
+
+Every OCI service has a config record with an `Enabled` switch, applied with `WithXxx(...)`
+(`WithStreaming(new StreamingConfig { Enabled = false })`). Functions and Kubernetes Engine (OKE) run
+real sibling containers and also have a `Mock` switch that turns that off
+(`WithOke(new OkeConfig { Mock = true })`). Other settings go through
+`WithEnvironment("FLOCI_OCI_SERVICES_…", …)` for now. Three records carry an `Oci` prefix because
+another cloud package has a type of the same name: `OciFunctionsConfig`, `OciKmsConfig` and
+`OciQueueConfig` (their methods are `WithFunctions`, `WithKms` and `WithQueue`). The authoritative
+list of config records is the set of `*Config.cs` files in
+[`src/Floci.Testcontainers.Oci`](https://github.com/floci-io/testcontainers-floci-dotnet/tree/main/src/Floci.Testcontainers.Oci).
+
+The Docker socket, the resource namespace and sibling cleanup work as described under
+[Container-based services](#container-based-services). Other builder options: `WithRegion(region)`,
+`WithTenancyId(ocid)`, `WithNamespace(name)`, `WithPrivateKeyPem(pem)` (hand out your own key instead
+of a generated one), `WithLogLevel(level)`, `WithResourceNamespace`,
+`WithDockerSocket(path)` and `WithoutDockerSocket()`. The builder always sets
+`FLOCI_OCI_TLS_HTTPS_PORT=0`; `WithEnvironment` overrides it. Readiness polls `/_floci-oci/health`
+on port 4599.
+
 ## Service configuration
 
 | Method                              | Description                                                         |
@@ -345,13 +408,15 @@ the floating `latest` tag; the .NET builder's baked-in default is a **pinned** t
 (a specific `x.y.z` release), exposed through the parameterless `FlociBuilder()` constructor and the
 `FlociBuilder.FlociImage` constant. Both are marked `[Obsolete]` and will be removed in a future
 version in favour of always passing the image, so new code should not rely on them.
-`FlociAzBuilder` and `FlociGcpBuilder` have no default image at all: pass it, e.g.
-`new FlociAzBuilder("floci/floci-az:latest")` or `new FlociGcpBuilder("floci/floci-gcp:latest")`.
+`FlociAzBuilder`, `FlociGcpBuilder` and `FlociOciBuilder` have no default image at all: pass it, e.g.
+`new FlociAzBuilder("floci/floci-az:latest")`, `new FlociGcpBuilder("floci/floci-gcp:latest")` or
+`new FlociOciBuilder("floci/floci-oci:latest")`.
 
 The tag this repository's integration tests run against is declared in
 [`TestImages.cs`](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/tests/Floci.Testcontainers.Aws.IntegrationTests/TestImages.cs)
 (Azure: [`TestImages.cs`](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/tests/Floci.Testcontainers.Az.IntegrationTests/TestImages.cs),
-GCP: [`TestImages.cs`](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/tests/Floci.Testcontainers.Gcp.IntegrationTests/TestImages.cs)). The images cached
+GCP: [`TestImages.cs`](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/tests/Floci.Testcontainers.Gcp.IntegrationTests/TestImages.cs),
+OCI: [`TestImages.cs`](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/tests/Floci.Testcontainers.Oci.IntegrationTests/TestImages.cs)). The images cached
 by CI are listed in [`.github/docker-images.txt`](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/.github/docker-images.txt).
 
 ## Requirements
@@ -370,7 +435,7 @@ Unit tests (`*ConfigTest`, no Docker) live in
 [`tests/Floci.Testcontainers.Aws.Tests`](https://github.com/floci-io/testcontainers-floci-dotnet/tree/main/tests/Floci.Testcontainers.Aws.Tests) and integration tests
 (`*ServiceTest`, real Floci containers) in
 [`tests/Floci.Testcontainers.Aws.IntegrationTests`](https://github.com/floci-io/testcontainers-floci-dotnet/tree/main/tests/Floci.Testcontainers.Aws.IntegrationTests);
-the Azure and GCP ones are in the `tests/Floci.Testcontainers.Az.*` and `tests/Floci.Testcontainers.Gcp.*` projects.
+the Azure, GCP and OCI ones are in the `tests/Floci.Testcontainers.Az.*`, `.Gcp.*` and `.Oci.*` projects.
 Test parallelization is disabled in the integration projects on purpose: container-backed tests
 flake under Docker daemon load. See [CONTRIBUTING.md](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/CONTRIBUTING.md) for the project layout,
 the branching model, and how to add a service.
