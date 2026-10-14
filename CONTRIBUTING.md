@@ -33,11 +33,13 @@ dotnet build Floci.Testcontainers.slnx -c Release -warnaserror
 dotnet test tests/Floci.Testcontainers.Aws.Tests/Floci.Testcontainers.Aws.Tests.csproj -c Release
 dotnet test tests/Floci.Testcontainers.Az.Tests/Floci.Testcontainers.Az.Tests.csproj -c Release
 dotnet test tests/Floci.Testcontainers.Gcp.Tests/Floci.Testcontainers.Gcp.Tests.csproj -c Release
+dotnet test tests/Floci.Testcontainers.Oci.Tests/Floci.Testcontainers.Oci.Tests.csproj -c Release
 
 # Integration tier — needs Docker; starts a real Floci container per test class.
 dotnet test tests/Floci.Testcontainers.Aws.IntegrationTests/Floci.Testcontainers.Aws.IntegrationTests.csproj -c Release
 dotnet test tests/Floci.Testcontainers.Az.IntegrationTests/Floci.Testcontainers.Az.IntegrationTests.csproj -c Release
 dotnet test tests/Floci.Testcontainers.Gcp.IntegrationTests/Floci.Testcontainers.Gcp.IntegrationTests.csproj -c Release
+dotnet test tests/Floci.Testcontainers.Oci.IntegrationTests/Floci.Testcontainers.Oci.IntegrationTests.csproj -c Release
 ```
 
 ## Project structure
@@ -67,9 +69,15 @@ src/Floci.Testcontainers.Gcp/                     Google Cloud module, built on 
   <Service>Config.cs                                One record per Google Cloud service
 tests/Floci.Testcontainers.Gcp.Tests/             Unit tests (GcpCloudTest, ServiceConfigTest) — no Docker
 tests/Floci.Testcontainers.Gcp.IntegrationTests/  Integration tests (*ServiceTest) — Docker required
+src/Floci.Testcontainers.Oci/                     OCI module, built on the core
+  OciCloud                                          The OCI descriptor and identity defaults
+  FlociOciConfiguration / FlociOciBuilder / FlociOciContainer  The Testcontainers triad
+  OciServiceConfig / OciMockableServiceConfig       Bases: the enabled switch, plus the mock switch
+  RsaKeyPem                                         The throwaway signing key the container hands out
+  <Service>Config.cs                                One record per OCI service
+tests/Floci.Testcontainers.Oci.Tests/             Unit tests (OciCloudTest, ServiceConfigTest, RsaKeyPemTest) — no Docker
+tests/Floci.Testcontainers.Oci.IntegrationTests/  Integration tests (*ServiceTest) — Docker required
 ```
-
-OCI will arrive as a sibling package (`Floci.Testcontainers.Oci`) on the same core.
 
 ## Branching model
 

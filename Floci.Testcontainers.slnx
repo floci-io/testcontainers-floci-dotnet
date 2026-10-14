@@ -4,6 +4,7 @@
     <Project Path="src/Floci.Testcontainers.Aws/Floci.Testcontainers.Aws.csproj" />
     <Project Path="src/Floci.Testcontainers.Az/Floci.Testcontainers.Az.csproj" />
     <Project Path="src/Floci.Testcontainers.Gcp/Floci.Testcontainers.Gcp.csproj" />
+    <Project Path="src/Floci.Testcontainers.Oci/Floci.Testcontainers.Oci.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Floci.Testcontainers.Aws.Tests/Floci.Testcontainers.Aws.Tests.csproj" />
@@ -12,5 +13,7 @@
     <Project Path="tests/Floci.Testcontainers.Az.IntegrationTests/Floci.Testcontainers.Az.IntegrationTests.csproj" />
     <Project Path="tests/Floci.Testcontainers.Gcp.Tests/Floci.Testcontainers.Gcp.Tests.csproj" />
     <Project Path="tests/Floci.Testcontainers.Gcp.IntegrationTests/Floci.Testcontainers.Gcp.IntegrationTests.csproj" />
+    <Project Path="tests/Floci.Testcontainers.Oci.Tests/Floci.Testcontainers.Oci.Tests.csproj" />
+    <Project Path="tests/Floci.Testcontainers.Oci.IntegrationTests/Floci.Testcontainers.Oci.IntegrationTests.csproj" />
   </Folder>
 </Solution>
