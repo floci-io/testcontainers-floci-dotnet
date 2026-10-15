@@ -7,10 +7,10 @@
 #
 # ECR images (public.ecr.aws/lambda/*, public.ecr.aws/docker/library/alpine) are intentionally
 # omitted: they don't count against Docker Hub limits.
-floci/floci:2.2.0
-floci/floci-az:0.14.0
-floci/floci-gcp:0.10.0
-floci/floci-oci:0.4.2
+floci/floci:2.3.0
+floci/floci-az:0.15.0
+floci/floci-gcp:0.11.0
+floci/floci-oci:0.5.0
 postgres:16-alpine
 opensearchproject/opensearch:2.19.5
 tinkerpop/gremlin-server:3.7.3

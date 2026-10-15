@@ -13,7 +13,7 @@ namespace Floci.Testcontainers.Aws;
 [PublicAPI]
 public sealed class FlociBuilder : ContainerBuilder<FlociBuilder, FlociContainer, FlociConfiguration>
 {
-    private const string DefaultImage = "floci/floci:2.2.0";
+    private const string DefaultImage = "floci/floci:2.3.0";
 
     /// <summary>
     /// The default Floci image.
