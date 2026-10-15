@@ -41,8 +41,8 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
-  # Step 2: Pack the release tag and publish to the floci-io GitHub Packages feed
-  # (nuget.org with trusted publishing follows the Floci.Testcontainers.* rename).
+  # Step 2: Pack every package of the release tag (the core and one per cloud) and publish them to
+  # nuget.org with trusted publishing.
   publish:
     needs: release-please
     if: >-
@@ -61,17 +61,27 @@ jobs:
         with:
           global-json-file: global.json
 
+      # Every unit-test project the tag has (tests/*.Tests; *.IntegrationTests need Docker and run
+      # in CI), so a new cloud is covered without touching this file.
       - name: Unit tests
-        run: dotnet test tests/Floci.Testcontainers.Aws.Tests/Floci.Testcontainers.Aws.Tests.csproj -c Release
+        run: |
+          set -euo pipefail
+          for project in tests/*.Tests/*.csproj; do
+            dotnet test "$project" -c Release
+          done
 
       - name: Pack
         env:
           TAG: ${{ inputs.tag || needs.release-please.outputs.tag-name }}
         # The version comes from the tag, so re-publishing a tag from before Directory.Build.props
-        # carried it cannot pack the release as the SDK default 1.0.0.
+        # carried it cannot pack the release as the SDK default 1.0.0. Every project under src/ is a
+        # package (Core plus one per cloud), all released in lockstep at the tag's version.
         run: |
-          dotnet pack src/Floci.Testcontainers.Core/Floci.Testcontainers.Core.csproj -c Release -o artifacts -p:Version="${TAG#v}"
-          dotnet pack src/Floci.Testcontainers.Aws/Floci.Testcontainers.Aws.csproj -c Release -o artifacts -p:Version="${TAG#v}"
+          set -euo pipefail
+          for project in src/*/*.csproj; do
+            dotnet pack "$project" -c Release -o artifacts -p:Version="${TAG#v}"
+          done
+          ls -1 artifacts/*.nupkg
 
       - name: Check the nuget.org user is configured
         env:
