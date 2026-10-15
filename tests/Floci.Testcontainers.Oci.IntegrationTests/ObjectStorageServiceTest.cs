@@ -67,15 +67,21 @@ public sealed class ObjectStorageServiceTest : IClassFixture<FlociOciFixture>
 
         const string otherTenancy = "ocid1.tenancy.oc1..anothertenancy000000000000000000000000000000000000000000";
         using var theirs = OciSdk.ObjectStorage(_floci, edit: config => config.Replace(_floci.TenancyId, otherTenancy));
-        Assert.DoesNotContain(await BucketNamesAsync(theirs), name => name == "tenancy-check");
+        // Each tenancy has its own namespace, and the emulator answers 404 for anyone else's.
+        var theirNamespace = (await theirs.GetNamespace(new GetNamespaceRequest())).Value;
+        Assert.NotEqual(_floci.Namespace, theirNamespace);
+        Assert.DoesNotContain(await BucketNamesAsync(theirs, theirNamespace, otherTenancy), name => name == "tenancy-check");
     }
 
-    private async Task<string[]> BucketNamesAsync(ObjectStorageClient client)
+    private Task<string[]> BucketNamesAsync(ObjectStorageClient client) =>
+        BucketNamesAsync(client, _floci.Namespace, _floci.TenancyId);
+
+    private static async Task<string[]> BucketNamesAsync(ObjectStorageClient client, string ns, string compartmentId)
     {
         var buckets = await client.ListBuckets(new ListBucketsRequest
         {
-            NamespaceName = _floci.Namespace,
-            CompartmentId = _floci.TenancyId,
+            NamespaceName = ns,
+            CompartmentId = compartmentId,
         });
         return buckets.Items.Select(bucket => bucket.Name).ToArray();
     }

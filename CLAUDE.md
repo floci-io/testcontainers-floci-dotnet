@@ -172,7 +172,10 @@ identity defaults. **There is no Java reference**: the source of truth is `Servi
   checks it byte for byte against the platform's own export.
 - **The tenancy is the partition**: resources are kept per tenancy taken from the signature, and
   unsigned requests use `FLOCI_OCI_DEFAULT_TENANCY_ID`. `WithTenancyId` sets that default and the
-  tenancy of the handed-out credentials together, so both see the same resources.
+  tenancy of the handed-out credentials together, so both see the same resources. Since floci-oci
+  0.5.0 each tenancy also has its own Object Storage namespace (the default tenancy keeps
+  `Namespace`, others get one derived from their OCID) and a path namespace that is not the caller's
+  answers 404 `NamespaceNotFound`: a client signing as another tenancy asks `GetNamespace` for its own.
 - **`FLOCI_OCI_AUTH_REQUIRE_SIGNATURE=true` cannot be used with this container on 0.4.2**: the emulator
   then answers 401 on its own exempt paths (`/health`, `/_floci-oci/*`), so the readiness wait never
   succeeds. It is an emulator bug; do not work around it here. That is why no test enables it.
