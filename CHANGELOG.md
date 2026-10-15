@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.1.0](https://github.com/floci-io/testcontainers-floci-dotnet/compare/v1.0.1...v1.1.0) (2026-10-15)
+
+
+### Features
+
+* **az:** add Floci.Testcontainers.Az for the Azure emulator ([#133](https://github.com/floci-io/testcontainers-floci-dotnet/issues/133)) ([7cafae9](https://github.com/floci-io/testcontainers-floci-dotnet/commit/7cafae960d64139005bb75776d3ea136c43dc08e))
+* **gcp:** add Floci.Testcontainers.Gcp for the Google Cloud emulator ([#136](https://github.com/floci-io/testcontainers-floci-dotnet/issues/136)) ([440a754](https://github.com/floci-io/testcontainers-floci-dotnet/commit/440a7540f1568bebf3a8b1daba1b69b8cd95a247))
+* **oci:** add Floci.Testcontainers.Oci for the Oracle Cloud Infrastructure emulator ([#137](https://github.com/floci-io/testcontainers-floci-dotnet/issues/137)) ([6032428](https://github.com/floci-io/testcontainers-floci-dotnet/commit/60324284f3de8f351539f7d43386125c164b437e))
+
+
+### Bug Fixes
+
+* default to floci/floci:2.3.0 and pin the new emulator images ([#139](https://github.com/floci-io/testcontainers-floci-dotnet/issues/139)) ([0125eeb](https://github.com/floci-io/testcontainers-floci-dotnet/commit/0125eebce4b5532049a1a6ec300f73f04f342c4b))
+* drop a replaced config's settings ([#134](https://github.com/floci-io/testcontainers-floci-dotnet/issues/134)) ([a446dfd](https://github.com/floci-io/testcontainers-floci-dotnet/commit/a446dfd257289497dd3d2401b5faed2914ff4416))
+
 ## [1.0.1](https://github.com/floci-io/testcontainers-floci-dotnet/compare/v1.0.0...v1.0.1) (2026-10-11)
 
 
