@@ -110,7 +110,7 @@ service list and tokens come from `ServicesConfig` in `floci-az`'s `EmulatorConf
   `AppConfigConfig`), since `Floci.Testcontainers.Aws` already has an `AppConfigConfig` and both
   namespaces are meant to be imported together; and `PolicyConfig` (`FLOCI_AZ_SERVICES_POLICY_ENABLED`),
   which the emulator has and Java does not yet.
-- Image: tests use `TestImages.FlociAz` (`floci/floci-az:0.14.0`); keep it in sync with
+- Image: tests use `TestImages.FlociAz` (`floci/floci-az:0.15.0`); keep it in sync with
   `.github/docker-images.txt`.
 
 ## GCP (`Floci.Testcontainers.Gcp`)
@@ -147,7 +147,7 @@ reference**: the source of truth is `ServicesConfig` in `floci-gcp`'s `EmulatorC
 - **Integration tests set process environment variables**: `FlociGcpFixture` applies
   `GetEmulatorEnv()` to the test process so clients are built with emulator detection, which is only
   safe because the suite runs serially.
-- Image: tests use `TestImages.FlociGcp` (`floci/floci-gcp:0.10.0`); keep it in sync with
+- Image: tests use `TestImages.FlociGcp` (`floci/floci-gcp:0.11.0`); keep it in sync with
   `.github/docker-images.txt`.
 
 ## OCI (`Floci.Testcontainers.Oci`)
@@ -172,7 +172,10 @@ identity defaults. **There is no Java reference**: the source of truth is `Servi
   checks it byte for byte against the platform's own export.
 - **The tenancy is the partition**: resources are kept per tenancy taken from the signature, and
   unsigned requests use `FLOCI_OCI_DEFAULT_TENANCY_ID`. `WithTenancyId` sets that default and the
-  tenancy of the handed-out credentials together, so both see the same resources.
+  tenancy of the handed-out credentials together, so both see the same resources. Since floci-oci
+  0.5.0 each tenancy also has its own Object Storage namespace (the default tenancy keeps
+  `Namespace`, others get one derived from their OCID) and a path namespace that is not the caller's
+  answers 404 `NamespaceNotFound`: a client signing as another tenancy asks `GetNamespace` for its own.
 - **`FLOCI_OCI_AUTH_REQUIRE_SIGNATURE=true` cannot be used with this container on 0.4.2**: the emulator
   then answers 401 on its own exempt paths (`/health`, `/_floci-oci/*`), so the readiness wait never
   succeeds. It is an emulator bug; do not work around it here. That is why no test enables it.
@@ -187,7 +190,7 @@ identity defaults. **There is no Java reference**: the source of truth is `Servi
   `FLOCI_OCI_TLS_ENABLED=true` is set through `WithEnvironment`; `TlsServiceTest` covers that.
 - **Type names that clash with another cloud package carry the cloud prefix**: `OciFunctionsConfig`,
   `OciKmsConfig`, `OciQueueConfig`. The builder methods stay `WithFunctions`, `WithKms`, `WithQueue`.
-- Image: tests use `TestImages.FlociOci` (`floci/floci-oci:0.4.2`); keep it in sync with
+- Image: tests use `TestImages.FlociOci` (`floci/floci-oci:0.5.0`); keep it in sync with
   `.github/docker-images.txt`.
 
 ## Conventions & decisions (do not relitigate)
@@ -206,7 +209,7 @@ identity defaults. **There is no Java reference**: the source of truth is `Servi
   only when enabled. Top-level: `FLOCI_DEFAULT_REGION` / `FLOCI_DEFAULT_ACCOUNT_ID` /
   `FLOCI_DEFAULT_AVAILABILITY_ZONE`. Verified against the running image — match Java keys exactly.
 - Endpoint is `GetEndpoint()` (`http://host:mappedPort/`); credentials are dummy `test`/`test`.
-- Image: pinned `floci/floci:2.2.0` (the `FlociBuilder` default and `TestImages.Floci`; keep the
+- Image: pinned `floci/floci:2.3.0` (the `FlociBuilder` default and `TestImages.Floci`; keep the
   two in sync, and in sync with `.github/docker-images.txt` for the CI cache), port 4566, native arm64.
 
 ## Gotchas

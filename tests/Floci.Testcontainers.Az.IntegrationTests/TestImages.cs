@@ -6,5 +6,5 @@ namespace Floci.Testcontainers.Az.Tests;
 /// </summary>
 internal static class TestImages
 {
-    public const string FlociAz = "floci/floci-az:0.14.0";
+    public const string FlociAz = "floci/floci-az:0.15.0";
 }

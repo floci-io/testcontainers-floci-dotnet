@@ -6,5 +6,5 @@ namespace Floci.Testcontainers.Oci.Tests;
 /// </summary>
 internal static class TestImages
 {
-    public const string FlociOci = "floci/floci-oci:0.4.2";
+    public const string FlociOci = "floci/floci-oci:0.5.0";
 }

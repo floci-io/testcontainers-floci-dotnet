@@ -6,5 +6,5 @@ namespace Floci.Testcontainers.Gcp.Tests;
 /// </summary>
 internal static class TestImages
 {
-    public const string FlociGcp = "floci/floci-gcp:0.10.0";
+    public const string FlociGcp = "floci/floci-gcp:0.11.0";
 }
