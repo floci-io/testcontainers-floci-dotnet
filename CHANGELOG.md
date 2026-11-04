@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/floci-io/testcontainers-floci-dotnet/compare/v1.1.0...v1.1.1) (2026-11-04)
+
+
+### Bug Fixes
+
+* **cloudfront:** let the distribution suffix follow the partition ([#155](https://github.com/floci-io/testcontainers-floci-dotnet/issues/155)) ([80acaac](https://github.com/floci-io/testcontainers-floci-dotnet/commit/80acaac0944c16b21ae4f8e0696375aeb1982328))
+
 ## [1.1.0](https://github.com/floci-io/testcontainers-floci-dotnet/compare/v1.0.1...v1.1.0) (2026-10-15)
 
 
