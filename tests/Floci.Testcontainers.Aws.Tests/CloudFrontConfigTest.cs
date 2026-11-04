@@ -11,16 +11,16 @@ public sealed class CloudFrontConfigTest
         var config = new CloudFrontConfig();
 
         Assert.True(config.Enabled);
-        Assert.Equal("cloudfront.net", config.DomainSuffix);
+        Assert.Null(config.DomainSuffix);
     }
 
     [Fact]
-    public void DefaultConfigEmitsUpstreamDefaultEnvVars()
+    public void DefaultConfigLeavesTheDomainSuffixToFloci()
     {
         var env = new CloudFrontConfig().BuildEnvironment();
 
         Assert.Equal("true", env["FLOCI_SERVICES_CLOUDFRONT_ENABLED"]);
-        Assert.Equal("cloudfront.net", env["FLOCI_SERVICES_CLOUDFRONT_DOMAIN_SUFFIX"]);
+        Assert.DoesNotContain("FLOCI_SERVICES_CLOUDFRONT_DOMAIN_SUFFIX", env.Keys);
     }
 
     [Fact]
