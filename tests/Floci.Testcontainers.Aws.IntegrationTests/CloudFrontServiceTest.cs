@@ -77,6 +77,7 @@ public sealed class CloudFrontServiceTest : IAsyncLifetime
         });
 
         Assert.False(string.IsNullOrEmpty(created.Distribution.Id));
+        Assert.EndsWith(".cloudfront.net", created.Distribution.DomainName);
 
         var got = await cf.GetDistributionAsync(new GetDistributionRequest { Id = created.Distribution.Id });
 

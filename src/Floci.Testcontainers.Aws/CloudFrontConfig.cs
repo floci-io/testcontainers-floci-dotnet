@@ -18,10 +18,10 @@ namespace Floci.Testcontainers.Aws;
 public sealed record CloudFrontConfig : FlociServiceConfig
 {
     /// <summary>
-    /// Gets the domain suffix used for CloudFront distribution domain names.
-    /// Defaults to <c>cloudfront.net</c>.
+    /// Gets the domain suffix used for CloudFront distribution domain names in every partition, or
+    /// <see langword="null" /> to let Floci derive it from the request's partition.
     /// </summary>
-    public string DomainSuffix { get; init; } = "cloudfront.net";
+    public string? DomainSuffix { get; init; } = null;
 
     /// <inheritdoc />
     protected override string ServiceKey => "CLOUDFRONT";
@@ -29,6 +29,9 @@ public sealed record CloudFrontConfig : FlociServiceConfig
     /// <inheritdoc />
     protected override void AddSettings(IDictionary<string, string> env, string prefix)
     {
-        env[prefix + "DOMAIN_SUFFIX"] = DomainSuffix;
+        if (DomainSuffix is not null)
+        {
+            env[prefix + "DOMAIN_SUFFIX"] = DomainSuffix;
+        }
     }
 }
