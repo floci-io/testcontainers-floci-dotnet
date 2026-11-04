@@ -10,7 +10,7 @@
   <ItemGroup>
     <!-- The OCI SDK asks for Newtonsoft.Json 12.0.3, which has a known vulnerability (GHSA-5crp-9r3c-p9vr). -->
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-    <PackageReference Include="OCI.DotNetSDK.Objectstorage" Version="148.1.0" />
+    <PackageReference Include="OCI.DotNetSDK.Objectstorage" Version="150.0.0" />
     <PackageReference Include="coverlet.collector" Version="10.1.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
