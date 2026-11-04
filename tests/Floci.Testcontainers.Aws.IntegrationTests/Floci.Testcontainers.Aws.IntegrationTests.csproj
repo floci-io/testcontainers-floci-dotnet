@@ -74,7 +74,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Gremlin.Net" Version="3.8.2" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
     <PackageReference Include="Npgsql" Version="10.0.3" />
     <PackageReference Include="StackExchange.Redis" Version="3.4.0" />
     <PackageReference Include="xunit" Version="2.9.3" />
