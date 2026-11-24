@@ -5,7 +5,7 @@ branching model, and the conventions to follow.
 
 Please also read the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-**Join us on [Slack](https://join.slack.com/t/floci/shared_invite/zt-3tjn02s3q-A00kEjJ1cZxsg_imTfy6Cw)**: it is the fastest way to reach maintainers.
+**Join us on [Slack](https://floci.io/slack)**: it is the fastest way to reach maintainers.
 
 ## Getting started
 
