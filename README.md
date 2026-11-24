@@ -466,7 +466,7 @@ On native Linux Docker (e.g. CI), neither variable is needed.
 
 ## Community
 
-- 💬 [Slack](https://join.slack.com/t/floci/shared_invite/zt-3tjn02s3q-A00kEjJ1cZxsg_imTfy6Cw): quick questions and community chat
+- 💬 [Slack](https://floci.io/slack): quick questions and community chat
 - 🗣️ [GitHub Discussions](https://github.com/orgs/floci-io/discussions): ideas, design tradeoffs, and proposals
 - [CONTRIBUTING.md](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/CONTRIBUTING.md) · [SECURITY.md](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/SECURITY.md) · [CODE_OF_CONDUCT.md](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/CODE_OF_CONDUCT.md) · [MAINTAINERS.md](https://github.com/floci-io/testcontainers-floci-dotnet/blob/main/MAINTAINERS.md)
 
